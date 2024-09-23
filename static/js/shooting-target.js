@@ -3,11 +3,16 @@ let gameRunning = true;
 let difficulty = 1;
 let targetInterval;
 
+// Sound effects
+const hitSound = new Audio('path/to/hit.mp3'); // Update with your sound file path
+const missSound = new Audio('path/to/miss.mp3'); // Update with your sound file path
+
+document.getElementById('pause-button').addEventListener('click', pauseGame);
+
 function startGame() {
     const gameArea = document.getElementById('game-area');
     gameArea.innerHTML = ''; // Clear the area for new targets
 
-    // Start spawning targets
     targetInterval = setInterval(() => {
         if (!gameRunning) return;
         spawnTargets();
@@ -31,10 +36,10 @@ function spawnTargets() {
         target.addEventListener('click', () => {
             if (isEnemy) {
                 score += 10; // Gain points for hitting enemy
-                showMessage("Hit Enemy! +10 points", 'green');
+                showMessage("Hit Enemy! +10 points", 'green', true);
             } else {
                 score -= 5; // Lose points for hitting friendly
-                showMessage("Hit Friendly! -5 points", 'red');
+                showMessage("Hit Friendly! -5 points", 'red', false);
             }
             updateScore();
             gameArea.removeChild(target); // Remove target after hit
@@ -48,7 +53,7 @@ function spawnTargets() {
             if (gameArea.contains(target)) {
                 if (isEnemy) {
                     score -= 5; // Lose points for missing an enemy
-                    showMessage("Missed Enemy! -5 points", 'red');
+                    showMessage("Missed Enemy! -5 points", 'red', false);
                 }
                 gameArea.removeChild(target);
                 updateScore();
@@ -61,12 +66,14 @@ function updateScore() {
     document.getElementById('score').innerText = score;
 }
 
-function showMessage(message, color) {
+function showMessage(message, color, isHit) {
     const messageElement = document.getElementById('message');
     messageElement.innerText = message;
     messageElement.style.color = color;
 
-    // Hide the message after 1 second
+    if (isHit) hitSound.play(); // Play sound on hit
+    else missSound.play(); // Play sound on miss
+
     setTimeout(() => {
         messageElement.innerText = '';
     }, 1000);
@@ -74,12 +81,13 @@ function showMessage(message, color) {
 
 function pauseGame() {
     gameRunning = !gameRunning;
+    const pauseButton = document.getElementById('pause-button');
     if (gameRunning) {
         startGame();
-        document.getElementById('pause-button').innerText = 'Pause';
+        pauseButton.innerText = 'Pause';
     } else {
         clearInterval(targetInterval);
-        document.getElementById('pause-button').innerText = 'Resume';
+        pauseButton.innerText = 'Resume';
     }
 }
 
