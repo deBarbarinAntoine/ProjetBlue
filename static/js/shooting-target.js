@@ -1,43 +1,94 @@
 let score = 0;
-let gameRunning = true;
+let gameRunning = false;
 let difficulty = 1;
 let targetInterval;
 
-function startGame() {
-    const gameArea = document.getElementById('game-area');
-    gameArea.innerHTML = ''; // Clear the area for new targets
+// Sound effects
+const hitSounds = [
+    new Audio('/static/sound_mp3/enemy_hurt1.mp3'),
+    new Audio('/static/sound_mp3/enemy_hurt2.mp3'),
+    new Audio('/static/sound_mp3/enemy_hurt3.mp3')
+];
+const missSound = new Audio('/static/sound_mp3/enemy_missed.mp3');
+const allyHitSound = new Audio('/static/sound_mp3/ally_shot.mp3');
+const gameStartSound = new Audio('/static/sound_mp3/game_start.mp3');
+const playerShotSound = new Audio('/static/sound_mp3/player_gun_shot.mp3');
 
-    // Start spawning targets
+// Initialize UI elements
+const startButton = document.getElementById('start-button');
+const pauseButton = document.getElementById('pause-button');
+const gameArea = document.getElementById('game-area');
+const scoreDisplay = document.getElementById('score');
+const messageElement = document.getElementById('message');
+
+// Event listeners
+startButton.addEventListener('click', startGame);
+pauseButton.addEventListener('click', pauseGame);
+
+function startGame() {
+    score = 0; // Reset score
+    difficulty = 1; // Reset difficulty
+    gameRunning = true;
+    gameArea.innerHTML = ''; // Clear the area for new targets
+    updateScore();
+
+    // Play the game start sound
+    gameStartSound.currentTime = 0; // Reset sound to play from the start
+    gameStartSound.play();
     targetInterval = setInterval(() => {
         if (!gameRunning) return;
         spawnTargets();
     }, 3000 / difficulty); // Spawn targets faster as difficulty increases
+
+    // Set a timer to increase difficulty every 9 seconds
+    setInterval(() => {
+        if (gameRunning) {
+            difficulty += 1; // Increase difficulty over time
+        }
+    }, 9000);
+
+    // End the game after 60 seconds
+    setTimeout(() => {
+        endGame();
+    }, 60000); // End game after 1 minute
+
+    startButton.disabled = true; // Disable start button
 }
 
 function spawnTargets() {
-    const gameArea = document.getElementById('game-area');
-    const numTargets = Math.floor(Math.random() * 3) + 1; // 1 to 3 targets
+    const numTargets = Math.floor(Math.random() * Math.max(1, Math.floor(difficulty))) + 1; // 1 to max targets based on difficulty
 
     for (let i = 0; i < numTargets; i++) {
         const target = document.createElement('div');
-        const isEnemy = Math.random() > 0.5; // 50% chance it's an enemy
+        const isEnemy = Math.random() > 0.4; // 60% chance it's an enemy
         target.classList.add('target', isEnemy ? 'enemy' : 'friendly');
 
         // Random position for the target
-        target.style.left = Math.random() * 80 + 'vw';
-        target.style.top = Math.random() * 80 + 'vh';
+        target.style.left = Math.random() * 85 + 'vw';
+        target.style.top = Math.random() * 75 + 'vh';
 
         // Add click event listener
         target.addEventListener('click', () => {
-            if (isEnemy) {
-                score += 10; // Gain points for hitting enemy
-                showMessage("Hit Enemy! +10 points", 'green');
-            } else {
-                score -= 5; // Lose points for hitting friendly
-                showMessage("Hit Friendly! -5 points", 'red');
-            }
-            updateScore();
+            playClickSound(); // Play gunshot sound after 0.5 seconds
+            setTimeout(() => {
+                if (isEnemy) {
+                    const randomHitSound = hitSounds[Math.floor(Math.random() * hitSounds.length)];
+                    randomHitSound.currentTime = 0; // Reset sound to play from the start
+                    randomHitSound.play(); // Play a random hit sound
+                    score += 10; // Gain points for hitting enemy
+                    showMessage("Hit Enemy! +10 points", 'green', true);
+                } else {
+                    allyHitSound.currentTime = 0; // Reset sound to play from the start
+                    allyHitSound.play(); // Play a random hit sound
+                    score -= 5; // Lose points for hitting friendly
+                    showMessage("Hit Friendly! -5 points", 'red', false);
+                }
+                updateScore();
+            }, 300);
             gameArea.removeChild(target); // Remove target after hit
+            // Play the game start sound
+            gameStartSound.currentTime = 0; // Reset sound to play from the start
+            gameStartSound.play();
         });
 
         // Append target to the game area
@@ -47,8 +98,10 @@ function spawnTargets() {
         setTimeout(() => {
             if (gameArea.contains(target)) {
                 if (isEnemy) {
+                    missSound.currentTime = 0; // Reset sound to play from the start
+                    missSound.play(); // Play a random hit sound
                     score -= 5; // Lose points for missing an enemy
-                    showMessage("Missed Enemy! -5 points", 'red');
+                    showMessage("Missed Enemy! -5 points", 'red', false);
                 }
                 gameArea.removeChild(target);
                 updateScore();
@@ -58,44 +111,46 @@ function spawnTargets() {
 }
 
 function updateScore() {
-    document.getElementById('score').innerText = score;
+    scoreDisplay.innerText = score;
 }
 
-function showMessage(message, color) {
-    const messageElement = document.getElementById('message');
+function showMessage(message, color, isHit) {
     messageElement.innerText = message;
     messageElement.style.color = color;
 
-    // Hide the message after 1 second
     setTimeout(() => {
         messageElement.innerText = '';
     }, 1000);
+}
+
+function playClickSound() {
+    playerShotSound.currentTime = 0; // Reset sound to play from the start
+    playerShotSound.play(); // Play gun shot sound on click
 }
 
 function pauseGame() {
     gameRunning = !gameRunning;
     if (gameRunning) {
         startGame();
-        document.getElementById('pause-button').innerText = 'Pause';
+        pauseButton.innerText = 'Pause';
     } else {
         clearInterval(targetInterval);
-        document.getElementById('pause-button').innerText = 'Resume';
+        pauseButton.innerText = 'Resume';
     }
 }
 
-// Set a timer to increase difficulty every 10 seconds
-setInterval(() => {
-    if (gameRunning) {
-        difficulty += 0.1; // Increase difficulty over time
-    }
-}, 10000);
-
-// End the game after 60 seconds
-setTimeout(() => {
+function endGame() {
     gameRunning = false;
     clearInterval(targetInterval);
     alert("Game Over! Final Score: " + score);
-}, 60000); // End game after 1 minute
+    const restartButton = document.createElement('button');
+    restartButton.innerText = 'Restart';
+    restartButton.addEventListener('click', () => {
+        document.body.removeChild(restartButton);
+        startButton.disabled = false; // Enable the start button
+    });
+    document.body.appendChild(restartButton);
+}
 
-// Start the game
-startGame();
+// Start button UI setup
+startButton.disabled = false; // Ensure start button is enabled initially
