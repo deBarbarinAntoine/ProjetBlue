@@ -29,7 +29,7 @@ func puzzleGamePage(w http.ResponseWriter, r *http.Request) {
 
 // Serve the reaction speed page
 func reactionSpeedPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./html-page/reaction-speed.html")
+	http.ServeFile(w, r, "./html-page/shoot-the-target.html")
 }
 
 // Middleware for adding basic security headers
