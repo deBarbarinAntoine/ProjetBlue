@@ -4,13 +4,17 @@ body {
 }
 
 #game-area {
-    width: 100vw;
+    width: 90vw;
     height: 80vh;
     position: relative;
     margin: 20px auto;
     border: 2px solid black;
     overflow: hidden;
     background-color: lightgray;
+    background-image: url("/static/shooting_image/playgound.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .target {
@@ -22,11 +26,17 @@ body {
 }
 
 .enemy {
-    background-color: red;
+    background-image: url("/static/shooting_image/enemy.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
 }
 
 .friendly {
-    background-color: blue;
+    background-image: url("/static/shooting_image/ally.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
 }
 
 #message {
