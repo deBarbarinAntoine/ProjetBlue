@@ -3,18 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reaction Speed Game</title>
-  <link rel="stylesheet" href="/static/css/reaction-speed.css">
+  <title>Shooting Target Game</title>
+  <link rel="stylesheet" href="/static/css/shooting-target.css">
 </head>
 <body>
-<h1>Reaction Speed Game</h1>
-<p>Click the button as soon as it appears! How fast can you react?</p>
+<h1>Shooting Target Game</h1>
+<p>Shoot the enemies and avoid hitting friendlies!</p>
+<p>Score: <span id="score">0</span></p>
+
+<!-- Add this new element for messages -->
+<p id="message"></p>
 
 <div id="game-area">
-  <button id="reaction-button">Click Me!</button>
-  <p id="message"></p>
+  <!-- Targets will be dynamically added here -->
 </div>
 
-<script src="/static/js/reaction-speed.js"></script>
+<script src="/static/js/shooting-target.js"></script>
 </body>
 </html>
