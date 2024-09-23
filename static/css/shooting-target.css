@@ -3,6 +3,14 @@ body {
     text-align: center;
 }
 
+@keyframes blink {
+    0% { opacity: 1; }
+    25% { opacity: 0; }
+    50% { opacity: 1; }
+    75% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 #game-area {
     width: 90vw;
     height: 80vh;
@@ -11,15 +19,15 @@ body {
     border: 2px solid black;
     overflow: hidden;
     background-color: lightgray;
-    background-image: url("/static/shooting_image/playgound.jpg");
+    background-image: url("/static/shooting_image/playground.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
 .target {
-    width: 50px;
-    height: 50px;
+    width: 5vw;
+    height: 5vw;
     position: absolute;
     border-radius: 50%;
     cursor: pointer;
@@ -47,4 +55,8 @@ body {
 #score {
     font-size: 2em;
     font-weight: bold;
+}
+
+.blink {
+    animation: blink 500ms ease-in-out;
 }
