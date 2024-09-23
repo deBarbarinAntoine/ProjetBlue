@@ -75,7 +75,7 @@ function initBoard() {
     }
 }
 
-function printBoard(board) {
+function printBoardDebug(board) {
     for (let i = 0; i < board.length; i += width) {
         const row = board.slice(i, i + width);
         const concatenatedRow = row.join(' '); // Join elements with a space
@@ -85,7 +85,44 @@ function printBoard(board) {
 
 function init() {
     initBoard();
-    printBoard(board);
+    // DEBUG
+    printBoardDebug(board);
 }
 
 init();
+
+function timer() {
+
+}
+
+// for mouse events ⤵
+let button = document.querySelector("#button");
+button.addEventListener("mouseup", (e) => {
+    let log = document.querySelector("#log");
+    switch (e.button) {
+        case 0:
+            log.textContent = "Left button clicked.";
+            break;
+        case 1:
+            log.textContent = "Middle button clicked.";
+            break;
+        case 2:
+            log.textContent = "Right button clicked.";
+            break;
+        default:
+            log.textContent = `Unknown button code: ${e.button}`;
+    }
+});
+
+
+function leftClick() {
+
+}
+
+function rightClick() {
+
+}
+
+function bothClick() {
+
+}
