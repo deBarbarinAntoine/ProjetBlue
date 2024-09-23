@@ -1,16 +1,24 @@
 let score = 0;
 let gameRunning = true;
+let difficulty = 1;
+let targetInterval;
 
 function startGame() {
     const gameArea = document.getElementById('game-area');
     gameArea.innerHTML = ''; // Clear the area for new targets
 
-    const randomDelay = Math.floor(Math.random() * 2000) + 1000; // 1 to 3 seconds delay
-
-    setTimeout(() => {
+    // Start spawning targets
+    targetInterval = setInterval(() => {
         if (!gameRunning) return;
+        spawnTargets();
+    }, 3000 / difficulty); // Spawn targets faster as difficulty increases
+}
 
-        // Create a target (either enemy or friendly)
+function spawnTargets() {
+    const gameArea = document.getElementById('game-area');
+    const numTargets = Math.floor(Math.random() * 3) + 1; // 1 to 3 targets
+
+    for (let i = 0; i < numTargets; i++) {
         const target = document.createElement('div');
         const isEnemy = Math.random() > 0.5; // 50% chance it's an enemy
         target.classList.add('target', isEnemy ? 'enemy' : 'friendly');
@@ -30,7 +38,6 @@ function startGame() {
             }
             updateScore();
             gameArea.removeChild(target); // Remove target after hit
-            startGame(); // Generate new target
         });
 
         // Append target to the game area
@@ -45,10 +52,9 @@ function startGame() {
                 }
                 gameArea.removeChild(target);
                 updateScore();
-                startGame(); // Generate new target
             }
         }, 3000); // Target disappears after 3 seconds
-    }, randomDelay);
+    }
 }
 
 function updateScore() {
@@ -65,6 +71,31 @@ function showMessage(message, color) {
         messageElement.innerText = '';
     }, 1000);
 }
+
+function pauseGame() {
+    gameRunning = !gameRunning;
+    if (gameRunning) {
+        startGame();
+        document.getElementById('pause-button').innerText = 'Pause';
+    } else {
+        clearInterval(targetInterval);
+        document.getElementById('pause-button').innerText = 'Resume';
+    }
+}
+
+// Set a timer to increase difficulty every 10 seconds
+setInterval(() => {
+    if (gameRunning) {
+        difficulty += 0.1; // Increase difficulty over time
+    }
+}, 10000);
+
+// End the game after 60 seconds
+setTimeout(() => {
+    gameRunning = false;
+    clearInterval(targetInterval);
+    alert("Game Over! Final Score: " + score);
+}, 60000); // End game after 1 minute
 
 // Start the game
 startGame();
