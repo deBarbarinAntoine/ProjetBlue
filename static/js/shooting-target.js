@@ -35,7 +35,6 @@ function startGame() {
     // Play the game start sound
     gameStartSound.currentTime = 0; // Reset sound to play from the start
     gameStartSound.play();
-
     targetInterval = setInterval(() => {
         if (!gameRunning) return;
         spawnTargets();
