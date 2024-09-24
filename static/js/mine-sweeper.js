@@ -4,7 +4,7 @@ let board = [];
 let width = 14;
 let height = 14;
 let boardLength = width * height;
-let mineNb = 48;
+let mineNb = 32;
 let mine = 'M';
 
 
@@ -13,6 +13,9 @@ function randomIntFromInterval(min, max) { // min and max included
 }
 
 function getNeighborIndices(index) {
+
+    index = Number(index);
+
     const neighbors = [];
 
     // Get row and column indices
@@ -103,42 +106,112 @@ function displayBlankBoard() {
     }
 }
 
-function clickEvents(element) {
-    element.addEventListener('dblclick', () => {
+function clearEventListeners(elem) {
 
+    // cloning the cell to remove the eventListeners
+    const elemClone = elem.cloneNode(true);
+    elem.parentNode.replaceChild(elemClone, elem);
+    return  elemClone;
+}
+
+function revealedCellClickEvent(cell) {
+    cell.addEventListener('dblclick', () => {
+
+        const neighbors = getNeighborIndices(cell.dataset.id);
+        let freeCells = [];
+        let flaggedCellsNb = 0;
+        for (let i = 0; i < neighbors.length; i++) {
+            const neighbor = document.querySelector(`.cell[data-id='${neighbors[i]}']`);
+            if (!neighbor.classList.contains('revealed') && !neighbor.classList.contains('flagged')) {
+                freeCells.push(neighbor);
+            } else if (neighbor.classList.contains('flagged')) {
+                ++flaggedCellsNb;
+            }
+        }
+        if (freeCells.length === 0) {
+            return;
+        }
+        if (flaggedCellsNb === Number(cell.dataset.mineNb)) {
+            freeCells.forEach(cell => revealCell(cell));
+        }
     });
-    element.addEventListener('contextmenu', () => {
+    cell.addEventListener('contextmenu', (e) => e.preventDefault());
+}
 
+function clickEvents(cell) {
+    cell.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+
+        if (cell.classList.contains('flagged')) {
+            cell.innerHTML = '';
+        } else {
+            cell.innerHTML = '<img class="mine-image" src="/static/flag.png" alt="flag image">';
+        }
+        cell.classList.toggle('flagged');
     });
-    element.addEventListener('click', () => {
-        // DEBUG
-        console.log('click');
+    cell.addEventListener('click', () => {
 
-        // cloning the element to remove the eventListeners
-        const elementClone = element.cloneNode(true);
-        element.parentNode.replaceChild(elementClone, element);
-        element = elementClone;
-
-        element.classList.add('revealed');
-        const value = board[element.dataset.id];
-        switch (value) {
-            case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
-                element.innerText = value;
-                element.dataset.mineNb = `${value}`;
-                break;
-            case 'M':
-                element.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
-                element.classList.add('mine');
-                break;
-            default:
+        if (!cell.classList.contains('flagged')) {
+            revealCell(cell);
         }
     });
 }
 
+function revealCell(cell) {
+    cell = clearEventListeners(cell);
+
+    cell.classList.add('revealed');
+    const value = board[cell.dataset.id];
+    switch (value) {
+
+        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+            cell.innerText = value;
+            cell.dataset.mineNb = `${value}`;
+            break;
+
+        case 'M':
+            cell.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
+            cell.classList.add('mine');
+            revealAll();
+            return;
+
+        default:
+            const neighbors = getNeighborIndices(cell.dataset.id);
+
+            for (let i = 0; i < neighbors.length; i++) {
+                const neighbor = document.querySelector(`.cell[data-id='${neighbors[i]}']`);
+
+                if (!neighbor.classList.contains('revealed')) {
+                    revealCell(neighbor);
+                }
+            }
+    }
+    revealedCellClickEvent(cell);
+}
+
+function revealAll() {
+    for (let i = 0; i < boardLength; i++) {
+        if (board[i] === mine) {
+            let cell = document.querySelector(`.cell[data-id='${i}'`);
+            cell = clearEventListeners(cell);
+            cell.classList.add('revealed');
+            cell.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
+            cell.classList.add('mine');
+            cell.addEventListener('contextmenu', (e) => e.preventDefault());
+        } else {
+            let cell = document.querySelector(`.cell[data-id='${i}'`);
+            cell = clearEventListeners(cell);
+            cell.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+    }
+}
+
 function play() {
     initBoard();
+
     // DEBUG
     printBoardDebug(board);
+
     displayBlankBoard();
 
     // getting all cells
