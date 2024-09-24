@@ -26,7 +26,7 @@ body {
     overflow: hidden;
     /* Change the cursor image */
     cursor: url('/static/shooting_image/crosshair-cursor.png') 42 42, auto;
-    z-index: 1000000;
+    z-index: 1;
 }
 
 .background_image {
@@ -117,23 +117,30 @@ body {
     color: white; /* Text color */
     align-items: center; /* Center vertically */
     justify-content: center; /* Center horizontally */
-    z-index: 10; /* Ensure it's above the game content */
+    z-index: 2; /* Ensure it's above the game content */
     display: none; /* Initially hide the overlay */
-    cursor: url('/static/shooting_image/v-cursor.cur') auto;
+    cursor: url('/static/shooting_image/v-cursor.cur') pointer;
 }
 
-#start-button:before {
-    content: ""; /* Required to show the pseudo-element */
-    position: absolute; /* Position it absolutely */
-    left: 0; /* Start from the left */
-    bottom: 0; /* Align to the bottom of the button */
-    width: 100%; /* Full width of the button */
-    height: 2px; /* Height of the line */
-    background-color: black; /* Color of the line */
-    transform: scaleX(0); /* Start with scale of 0 (hidden) */
-    transition: transform 0.5s ease; /* Animation duration and easing */
+.menu-option:hover {
+    text-decoration: underline;
 }
 
-#start-button:hover:before {
-    transform: scaleX(1); /* Scale to full width on hover */
+.menu-option{
+    list-style: none;
+}
+
+.score {
+    position: absolute; /* Position it absolutely within the game area container */
+    top: 0; /* Distance from the top */
+    right: 0; /* Distance from the right */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent background for readability */
+    color: white; /* Score text color */
+    padding: 5px; /* Some padding for aesthetics */
+    border-radius: 5px; /* Rounded corners */
+    z-index: 10; /* Ensure it's on top of other elements */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2ch;
 }
