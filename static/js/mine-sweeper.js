@@ -1,10 +1,10 @@
 
 // setting the game variables
 let board = [];
-let width = 8;
-let height = 8;
+let width = 14;
+let height = 14;
 let boardLength = width * height;
-let mineNb = 12;
+let mineNb = 48;
 let mine = 'M';
 
 
@@ -92,7 +92,8 @@ function timer() {
 
 function displayBlankBoard() {
     boardElem.innerHTML = '';
-    boardElem.style.width = (width * (cellWidth + 1) - 2) + 'px';
+    boardElem.style.gridTemplateColumns = `repeat(${width}, ${cellWidth}px)`;
+    boardElem.style.width = 'fit-content';
     boardElem.style.height = 'fit-content';
     for (let i = 0; i < boardLength; i++) {
         const cellElem = document.createElement('div');
@@ -100,6 +101,38 @@ function displayBlankBoard() {
         cellElem.setAttribute('data-id', `${i}`);
         boardElem.appendChild(cellElem);
     }
+}
+
+function clickEvents(element) {
+    element.addEventListener('dblclick', () => {
+
+    });
+    element.addEventListener('contextmenu', () => {
+
+    });
+    element.addEventListener('click', () => {
+        // DEBUG
+        console.log('click');
+
+        // cloning the element to remove the eventListeners
+        const elementClone = element.cloneNode(true);
+        element.parentNode.replaceChild(elementClone, element);
+        element = elementClone;
+
+        element.classList.add('revealed');
+        const value = board[element.dataset.id];
+        switch (value) {
+            case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+                element.innerText = value;
+                element.dataset.mineNb = `${value}`;
+                break;
+            case 'M':
+                element.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
+                element.classList.add('mine');
+                break;
+            default:
+        }
+    });
 }
 
 function play() {
@@ -112,52 +145,8 @@ function play() {
     const cells = document.querySelectorAll('.cell');
 
     // add event listener for every cell
-    cells.forEach(cell => {
-        cell.addEventListener('click', () => {
-            // DEBUG
-            console.log('click');
-
-            // cloning the cell to remove the eventListeners
-            const cellClone = cell.cloneNode(true);
-            cell.parentNode.replaceChild(cellClone, cell);
-            cell = cellClone;
-
-            cell.classList.add('revealed');
-            const value = board[cell.dataset.id];
-            switch (value) {
-                case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
-                    cell.innerText = value;
-                    cell.dataset.mineNb = `${value}`;
-                    break;
-                case 'M':
-                    cell.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
-                    cell.classList.add('mine');
-                    break;
-                default:
-            }
-        })
-    });
+    cells.forEach(cell => clickEvents(cell));
 }
 
 const startBtn = document.querySelector('#start-btn');
-startBtn.addEventListener('click', play)
-
-
-// for mouse events ⤵
-// let button = document.querySelector("#button");
-// button.addEventListener("mouseup", (e) => {
-//     let log = document.querySelector("#log");
-//     switch (e.button) {
-//         case 0:
-//             log.textContent = "Left button clicked.";
-//             break;
-//         case 1:
-//             log.textContent = "Middle button clicked.";
-//             break;
-//         case 2:
-//             log.textContent = "Right button clicked.";
-//             break;
-//         default:
-//             log.textContent = `Unknown button code: ${e.button}`;
-//     }
-// });
+startBtn.addEventListener('click', play);
