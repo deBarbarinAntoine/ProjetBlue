@@ -11,8 +11,11 @@ let timeLeft = 0;
 let endGameTimeout;
 let gameStartTime;
 let gameOver = false;
-let difficultyLevel = 1
-let volume= 0.5;
+let baseDifficulty;
+let volume= 0.2;
+let setVolumeSlider = volume * 100;
+let maxDifficulty = 5;
+let randomLeft, randomTop;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -35,13 +38,15 @@ const gameAreaCTN = document.querySelector('.game-area-ctn');
 const scoreDisplay = document.getElementById('score');
 const imageElement = document.getElementById('image');
 
-// Update the event listener for the pause button
-pauseButton.addEventListener('click', () => {
-    if (gameRunning) {
-        if (isPaused) {
-            resumeGame(); // Call resume function if game is paused
-        } else {
-            pauseGame(); // Call pause function if game is running
+document.addEventListener('keydown', (event) => {
+    // Check if the 'P' key is pressed and the pauseButton is not disabled
+    if ((event.key === 'p' || event.key === 'P') && !pauseButton.disabled) {
+        if (gameRunning) {
+            if (isPaused) {
+                resumeGame(); // Call resume function if the game is paused
+            } else {
+                pauseGame(); // Call pause function if the game is running
+            }
         }
     }
 });
@@ -50,13 +55,12 @@ pauseButton.addEventListener('click', () => {
 function startGame() {
     score = 0; // Reset score
     gameRunning = true;
-    difficulty = difficultyLevel;
     gameArea.innerHTML = ''; // Clear the area for new targets
     updateScore();
     pauseButton.disabled = false;
     gameOver = false;
     imageElement.classList.add('background_image_animation');
-
+    baseDifficulty = difficulty;
     // Play the game start sound
     playSound(ambientSound);
     playSound(gameStartSound);
@@ -93,6 +97,7 @@ function startEndGameTimer() {
 
 function spawnTargets() {
     const numTargets = Math.floor(Math.random() * Math.max(1, Math.floor(difficulty))) + 1; // 1 to max targets based on difficulty
+    const existingTargets = []; // Array to store the positions and sizes of existing targets
 
     for (let i = 0; i < numTargets; i++) {
         const target = document.createElement('div');
@@ -100,15 +105,57 @@ function spawnTargets() {
         target.classList.add('target', isEnemy ? 'enemy' : 'friendly');
         target.classList.add('message');
 
-        // Random position for the target
-        const randomLeft = Math.random() * 85; // left between 0 and 85vw
-        const randomTop = Math.random() * 75; // top between 0 and 75vh
+        let scaleFactor;
+        let points;
+
+        if (isEnemy) {
+            // Random size for enemies (scale factor between 0.5 and 2)
+            scaleFactor = Math.random() * (2 - 0.5) + 0.5;
+            points = Math.round(10 / scaleFactor); // Example: smaller enemies give more points (inverse of size)
+        } else {
+            // Fixed size for friendly targets
+            scaleFactor = 1.2; // Fixed size for friendlies
+            points = -5; // Fixed penalty for friendlies
+        }
+
+        // Set the scale transform based on the scale factor
+        target.style.transform = `scale(${scaleFactor})`;
+
+        let validPositionFound = false;
+
+
+        // Try finding a non-overlapping position
+        while (!validPositionFound) {
+            // Generate random position for the target
+            randomLeft = Math.random() * 85; // left between 0 and 85vw
+            randomTop = Math.random() * 75; // top between 0 and 75vh
+
+            // Check if the new position overlaps with any existing targets
+            validPositionFound = true; // Assume valid until we find a conflict
+
+            for (const existing of existingTargets) {
+                const { left: existingLeft, top: existingTop, size: existingSize } = existing;
+
+                // Calculate distance between the new target and the existing target
+                const distance = Math.sqrt(
+                    Math.pow(randomLeft - existingLeft, 2) + Math.pow(randomTop - existingTop, 2)
+                );
+
+                // Check if they overlap (distance less than combined radius/size)
+                const combinedSize = (scaleFactor + existingSize) * 10; // Use a multiplier to calculate effective size
+                if (distance < combinedSize) {
+                    validPositionFound = false; // If overlap found, regenerate position
+                    break;
+                }
+            }
+        }
+
+        // Set the final position for the target
         target.style.left = randomLeft + 'vw';
         target.style.top = randomTop + 'vh';
 
-        // Scale based on position
-        const scaleFactor = 0.5 + (randomTop / 75) * (2 - 0.5);
-        target.style.transform = `scale(${scaleFactor})`;
+        // Store the position and size of the new target
+        existingTargets.push({ left: randomLeft, top: randomTop, size: scaleFactor });
 
         let isBlinking = false; // Flag to track blinking state
 
@@ -130,7 +177,7 @@ function spawnTargets() {
             scoreDisplay.style.color = isEnemy ? 'green' : 'red'; // Green for hit, red for miss
             scoreDisplay.style.fontWeight = 'bold';
             scoreDisplay.style.fontSize = '18px'; // Adjust size as needed
-            scoreDisplay.innerText = isEnemy ? "+10" : "-5"; // Show +10 for enemies, -5 for friendlies
+            scoreDisplay.innerText = isEnemy ? `+${points}` : `${points}`; // Show + points for enemies, - points for friendlies
 
             target.appendChild(scoreDisplay); // Append the score display to the target
 
@@ -150,10 +197,10 @@ function spawnTargets() {
 
             if (isEnemy) {
                 playSound(hitSounds);
-                score += 10; // Gain points for hitting enemy
+                score += points; // Gain points based on the size of the enemy
             } else {
                 playSound(allyHitSound);
-                score -= 5; // Lose points for hitting friendly
+                score += points; // Friendlies always deduct fixed points
             }
             updateScore();
 
@@ -179,9 +226,9 @@ function spawnTargets() {
                     if (missSound.paused) {
                         missSound.currentTime = 0; // Reset to the start
                         missSound.play();
-                        missSound.volume = volume
+                        missSound.volume = volume;
                     }
-                    score -= 5; // Lose points for missing an enemy
+                    score -= points; // Lose points based on the size of the missed enemy
                 }
                 gameArea.removeChild(target);
                 updateScore();
@@ -206,23 +253,15 @@ function playSound(audioElement) {
 
 function endGame() {
     ambientSound.pause();
+    imageElement.classList.remove('background_image_animation');
     gameRunning = false;
     pauseButton.disabled = true;
     clearInterval(targetInterval);
     clearInterval(difficultyInterval);
     gameArea.innerHTML = ''; // Clear all targets
     gameOver = true;
+    difficulty = baseDifficulty;
     showPausedOverlay()
-}
-
-
-// Mute button
-const muteButton = document.getElementById('mute-button');
-muteButton.addEventListener('click', toggleSound);
-
-function toggleSound() {
-    soundEnabled = !soundEnabled;
-    muteButton.innerText = soundEnabled ? 'Mute' : 'Unmute';
 }
 
 function pauseGame() {
@@ -256,6 +295,7 @@ function hidePausedOverlay() {
         overlay.style.display = 'none'; // Hide overlay instead of removing
     }
 }
+
 function returnToMenu(){
     gameRunning = false;
     gameOver = false;
@@ -269,32 +309,48 @@ function showPausedOverlay() {
     overlay.id = 'paused-overlay';
     if (isPaused) {
         overlay.innerText = 'Game Paused';
-        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`
+        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`;
     } else if (!gameRunning && !gameOver) {
-        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <div class="menu-options"> <div class="button-30" id="start-button">Start Game</div> <div class="button-30" id="option-button">Difficulty</div> <div class="button-30" id="fullscreen-button">Fullscreen</div> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div> </div>'
+        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+                                <h1 class="menu-title">Shooting Game</h1> 
+                                <div class="menu-options"> 
+                                    <div class="button-30" id="start-button">Start Game</div> 
+                                    <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
+                                    <div class="button-30" id="fullscreen-button">Fullscreen</div> 
+                                    <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                                </div> 
+                             </div>`;
     } else if (!gameRunning && gameOver) {
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> <h1 class="menu-title">Game Over</h1> <h1 class="menu-title">You did ${score} points !</h1> <ul class="menu-options"> <li class="button-30" id="restart-button">Restart Game</li> <li class="button-30" id="back_to_start-button">Back to Menu</li> </ul> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div>`
+        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+                                <h1 class="menu-title">Game Over</h1> 
+                                <h1 class="menu-title">You did ${score} points !</h1> 
+                                <ul class="menu-options"> 
+                                    <li class="button-30" id="restart-button">Restart Game</li> 
+                                    <li class="button-30" id="back_to_start-button">Back to Menu</li> 
+                                </ul> 
+                                <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                             </div>`;
     }
     document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
     overlay.style.display = 'flex'; // Show the overlay
 
     let startButton = document.getElementById('start-button');
-    if(!!startButton){
+    if (startButton) {
         startButton.addEventListener('click', startGame);
     }
 
     const restartButton = document.getElementById('restart-button');
-    if (!!restartButton) {
+    if (restartButton) {
         restartButton.addEventListener('click', startGame);
     }
 
     const back_to_start = document.getElementById('back_to_start-button');
-    if (!!back_to_start) {
-        back_to_start.addEventListener('click',returnToMenu);
+    if (back_to_start) {
+        back_to_start.addEventListener('click', returnToMenu);
     }
 
     const fullscreen = document.getElementById('fullscreen-button');
-    if (!!fullscreen) {
+    if (fullscreen) {
         fullscreen.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 // Enter full screen
@@ -307,13 +363,20 @@ function showPausedOverlay() {
             }
         });
     }
+
+    const difficultyBtn = document.getElementById('difficulty-button');
+    if (difficultyBtn) {
+        difficultyBtn.addEventListener('click', () => {
+            // Change difficulty dynamically
+            difficulty = difficulty < maxDifficulty ? difficulty + 1 : 1;
+            difficultyBtn.innerText = `Difficulty : ${difficulty}`; // Update the button text immediately
+        });
+    }
+
     // Function to update sound volume based on slider
     document.getElementById('sound-slider').addEventListener('input', function (event) {
         volume = event.target.value / 100;  // Convert slider value to a fraction
         ambientSound.volume = volume;
     });
 }
-
-
-
 
