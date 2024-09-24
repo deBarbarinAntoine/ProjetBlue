@@ -1,3 +1,9 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', cursive; /* Google font for retro feel */
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -12,17 +18,33 @@ body {
 }
 
 #game-area {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    overflow: hidden;
+    /* Change the cursor image */
+    cursor: url('/static/shooting_image/crosshair-cursor.png') 42 42, auto;
+    z-index: 1000000;
+}
+
+.background_image {
+    object-fit: cover;
+    object-position: center;
+    height: 100%;
+    width: 100%;
+}
+
+.background_image_animation {animation: blurEffect 4s infinite ease-in-out; /* Blurring animation */}
+
+.game-area-ctn{
     width: 90vw;
     height: 80vh;
-    position: relative;
-    margin: 20px auto;
-    border: 2px solid black;
     overflow: hidden;
-    background-color: lightgray;
-    background-image: url("/static/shooting_image/playground.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    border: 2px solid black;
+    margin: 0 auto;
+    position: relative;
 }
 
 .target {
@@ -30,7 +52,7 @@ body {
     height: 5vw;
     position: absolute;
     border-radius: 50%;
-    cursor: pointer;
+    box-shadow: rgba(255, 255, 255, 0.35) 0px 5px 15px;
 }
 
 .enemy {
@@ -59,4 +81,59 @@ body {
 
 .blink {
     animation: blink 500ms ease-in-out;
+}
+
+/* Keyframes for blurring and moving */
+@keyframes blurEffect {
+    0% {
+        transform: scale(100%); /* Starting position */
+        filter: blur(0px); /* No blur */
+    }
+    25% {
+        transform: scale(102%); /* Shift right */
+        filter: blur(1px) hue-rotate(40deg); /* Full blur */
+    }
+    50% {
+        transform: scale(100%); /* Back to original position */
+        filter: blur(0px); /* No blur */
+    }
+    75% {
+        transform: scale(102%); /* Shift right */
+        filter: blur(1px) hue-rotate(40deg); /* Full blur */
+    }
+    100% {
+        transform: scale(100%); /* End at original position */
+        filter: blur(0px); /* No blur */
+    }
+}
+
+#paused-overlay {
+    position: absolute; /* Position it absolutely within the game area */
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: white; /* Text color */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    z-index: 10; /* Ensure it's above the game content */
+    display: none; /* Initially hide the overlay */
+    cursor: crosshair;
+}
+
+#start-button:before {
+    content: ""; /* Required to show the pseudo-element */
+    position: absolute; /* Position it absolutely */
+    left: 0; /* Start from the left */
+    bottom: 0; /* Align to the bottom of the button */
+    width: 100%; /* Full width of the button */
+    height: 2px; /* Height of the line */
+    background-color: black; /* Color of the line */
+    transform: scaleX(0); /* Start with scale of 0 (hidden) */
+    transition: transform 0.5s ease; /* Animation duration and easing */
+}
+
+#start-button:hover:before {
+    transform: scaleX(1); /* Scale to full width on hover */
 }
