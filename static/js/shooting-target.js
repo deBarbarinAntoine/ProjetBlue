@@ -271,7 +271,7 @@ function showPausedOverlay() {
     if (isPaused){
         overlay.innerText = 'Game Paused';
     }else if (!gameRunning && !gameOver) {
-        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <ul class="menu-options"> <li class="menu-option" id="start-button">Start Game</li> </ul> </div>'
+        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <ul class="menu-options"> <li class="menu-option" id="start-button">Start Game</li> <li class="menu-option" id="option-button">Game Stage</li> <li class="menu-option" id="screen-button">Screen</li> <li class="menu-option" id="sound-button">Sound</li> </ul> </div>'
     } else if (!gameRunning) {
         overlay.innerText = 'Game Over';
     }
