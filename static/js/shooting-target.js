@@ -11,8 +11,10 @@ let timeLeft = 0;
 let endGameTimeout;
 let gameStartTime;
 let gameOver = false;
-let difficultyLevel = 1
-let volume= 0.5;
+let baseDifficulty;
+let volume= 0.2;
+let setVolumeSlider = volume * 100;
+let maxDifficulty = 5;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -50,13 +52,12 @@ pauseButton.addEventListener('click', () => {
 function startGame() {
     score = 0; // Reset score
     gameRunning = true;
-    difficulty = difficultyLevel;
     gameArea.innerHTML = ''; // Clear the area for new targets
     updateScore();
     pauseButton.disabled = false;
     gameOver = false;
     imageElement.classList.add('background_image_animation');
-
+    baseDifficulty = difficulty;
     // Play the game start sound
     playSound(ambientSound);
     playSound(gameStartSound);
@@ -206,23 +207,15 @@ function playSound(audioElement) {
 
 function endGame() {
     ambientSound.pause();
+    imageElement.classList.remove('background_image_animation');
     gameRunning = false;
     pauseButton.disabled = true;
     clearInterval(targetInterval);
     clearInterval(difficultyInterval);
     gameArea.innerHTML = ''; // Clear all targets
     gameOver = true;
+    difficulty = baseDifficulty;
     showPausedOverlay()
-}
-
-
-// Mute button
-const muteButton = document.getElementById('mute-button');
-muteButton.addEventListener('click', toggleSound);
-
-function toggleSound() {
-    soundEnabled = !soundEnabled;
-    muteButton.innerText = soundEnabled ? 'Mute' : 'Unmute';
 }
 
 function pauseGame() {
@@ -256,6 +249,7 @@ function hidePausedOverlay() {
         overlay.style.display = 'none'; // Hide overlay instead of removing
     }
 }
+
 function returnToMenu(){
     gameRunning = false;
     gameOver = false;
@@ -269,32 +263,48 @@ function showPausedOverlay() {
     overlay.id = 'paused-overlay';
     if (isPaused) {
         overlay.innerText = 'Game Paused';
-        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`
+        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`;
     } else if (!gameRunning && !gameOver) {
-        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <div class="menu-options"> <div class="button-30" id="start-button">Start Game</div> <div class="button-30" id="option-button">Difficulty</div> <div class="button-30" id="fullscreen-button">Fullscreen</div> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div> </div>'
+        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+                                <h1 class="menu-title">Shooting Game</h1> 
+                                <div class="menu-options"> 
+                                    <div class="button-30" id="start-button">Start Game</div> 
+                                    <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
+                                    <div class="button-30" id="fullscreen-button">Fullscreen</div> 
+                                    <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                                </div> 
+                             </div>`;
     } else if (!gameRunning && gameOver) {
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> <h1 class="menu-title">Game Over</h1> <h1 class="menu-title">You did ${score} points !</h1> <ul class="menu-options"> <li class="button-30" id="restart-button">Restart Game</li> <li class="button-30" id="back_to_start-button">Back to Menu</li> </ul> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div>`
+        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+                                <h1 class="menu-title">Game Over</h1> 
+                                <h1 class="menu-title">You did ${score} points !</h1> 
+                                <ul class="menu-options"> 
+                                    <li class="button-30" id="restart-button">Restart Game</li> 
+                                    <li class="button-30" id="back_to_start-button">Back to Menu</li> 
+                                </ul> 
+                                <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                             </div>`;
     }
     document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
     overlay.style.display = 'flex'; // Show the overlay
 
     let startButton = document.getElementById('start-button');
-    if(!!startButton){
+    if (startButton) {
         startButton.addEventListener('click', startGame);
     }
 
     const restartButton = document.getElementById('restart-button');
-    if (!!restartButton) {
+    if (restartButton) {
         restartButton.addEventListener('click', startGame);
     }
 
     const back_to_start = document.getElementById('back_to_start-button');
-    if (!!back_to_start) {
-        back_to_start.addEventListener('click',returnToMenu);
+    if (back_to_start) {
+        back_to_start.addEventListener('click', returnToMenu);
     }
 
     const fullscreen = document.getElementById('fullscreen-button');
-    if (!!fullscreen) {
+    if (fullscreen) {
         fullscreen.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 // Enter full screen
@@ -307,13 +317,20 @@ function showPausedOverlay() {
             }
         });
     }
+
+    const difficultyBtn = document.getElementById('difficulty-button');
+    if (difficultyBtn) {
+        difficultyBtn.addEventListener('click', () => {
+            // Change difficulty dynamically
+            difficulty = difficulty < maxDifficulty ? difficulty + 1 : 1;
+            difficultyBtn.innerText = `Difficulty : ${difficulty}`; // Update the button text immediately
+        });
+    }
+
     // Function to update sound volume based on slider
     document.getElementById('sound-slider').addEventListener('input', function (event) {
         volume = event.target.value / 100;  // Convert slider value to a fraction
         ambientSound.volume = volume;
     });
 }
-
-
-
 
