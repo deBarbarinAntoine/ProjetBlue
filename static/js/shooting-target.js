@@ -15,6 +15,7 @@ let baseDifficulty;
 let volume= 0.2;
 let setVolumeSlider = volume * 100;
 let maxDifficulty = 5;
+let randomLeft, randomTop;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -96,6 +97,7 @@ function startEndGameTimer() {
 
 function spawnTargets() {
     const numTargets = Math.floor(Math.random() * Math.max(1, Math.floor(difficulty))) + 1; // 1 to max targets based on difficulty
+    const existingTargets = []; // Array to store the positions and sizes of existing targets
 
     for (let i = 0; i < numTargets; i++) {
         const target = document.createElement('div');
@@ -103,15 +105,57 @@ function spawnTargets() {
         target.classList.add('target', isEnemy ? 'enemy' : 'friendly');
         target.classList.add('message');
 
-        // Random position for the target
-        const randomLeft = Math.random() * 85; // left between 0 and 85vw
-        const randomTop = Math.random() * 75; // top between 0 and 75vh
+        let scaleFactor;
+        let points;
+
+        if (isEnemy) {
+            // Random size for enemies (scale factor between 0.5 and 2)
+            scaleFactor = Math.random() * (2 - 0.5) + 0.5;
+            points = Math.round(10 / scaleFactor); // Example: smaller enemies give more points (inverse of size)
+        } else {
+            // Fixed size for friendly targets
+            scaleFactor = 1.2; // Fixed size for friendlies
+            points = -5; // Fixed penalty for friendlies
+        }
+
+        // Set the scale transform based on the scale factor
+        target.style.transform = `scale(${scaleFactor})`;
+
+        let validPositionFound = false;
+
+
+        // Try finding a non-overlapping position
+        while (!validPositionFound) {
+            // Generate random position for the target
+            randomLeft = Math.random() * 85; // left between 0 and 85vw
+            randomTop = Math.random() * 75; // top between 0 and 75vh
+
+            // Check if the new position overlaps with any existing targets
+            validPositionFound = true; // Assume valid until we find a conflict
+
+            for (const existing of existingTargets) {
+                const { left: existingLeft, top: existingTop, size: existingSize } = existing;
+
+                // Calculate distance between the new target and the existing target
+                const distance = Math.sqrt(
+                    Math.pow(randomLeft - existingLeft, 2) + Math.pow(randomTop - existingTop, 2)
+                );
+
+                // Check if they overlap (distance less than combined radius/size)
+                const combinedSize = (scaleFactor + existingSize) * 10; // Use a multiplier to calculate effective size
+                if (distance < combinedSize) {
+                    validPositionFound = false; // If overlap found, regenerate position
+                    break;
+                }
+            }
+        }
+
+        // Set the final position for the target
         target.style.left = randomLeft + 'vw';
         target.style.top = randomTop + 'vh';
 
-        // Scale based on position
-        const scaleFactor = 0.5 + (randomTop / 75) * (2 - 0.5);
-        target.style.transform = `scale(${scaleFactor})`;
+        // Store the position and size of the new target
+        existingTargets.push({ left: randomLeft, top: randomTop, size: scaleFactor });
 
         let isBlinking = false; // Flag to track blinking state
 
@@ -133,7 +177,7 @@ function spawnTargets() {
             scoreDisplay.style.color = isEnemy ? 'green' : 'red'; // Green for hit, red for miss
             scoreDisplay.style.fontWeight = 'bold';
             scoreDisplay.style.fontSize = '18px'; // Adjust size as needed
-            scoreDisplay.innerText = isEnemy ? "+10" : "-5"; // Show +10 for enemies, -5 for friendlies
+            scoreDisplay.innerText = isEnemy ? `+${points}` : `${points}`; // Show + points for enemies, - points for friendlies
 
             target.appendChild(scoreDisplay); // Append the score display to the target
 
@@ -153,10 +197,10 @@ function spawnTargets() {
 
             if (isEnemy) {
                 playSound(hitSounds);
-                score += 10; // Gain points for hitting enemy
+                score += points; // Gain points based on the size of the enemy
             } else {
                 playSound(allyHitSound);
-                score -= 5; // Lose points for hitting friendly
+                score += points; // Friendlies always deduct fixed points
             }
             updateScore();
 
@@ -182,9 +226,9 @@ function spawnTargets() {
                     if (missSound.paused) {
                         missSound.currentTime = 0; // Reset to the start
                         missSound.play();
-                        missSound.volume = volume
+                        missSound.volume = volume;
                     }
-                    score -= 5; // Lose points for missing an enemy
+                    score -= points; // Lose points based on the size of the missed enemy
                 }
                 gameArea.removeChild(target);
                 updateScore();
