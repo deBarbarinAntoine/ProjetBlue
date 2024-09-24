@@ -119,7 +119,7 @@ body {
     justify-content: center; /* Center horizontally */
     z-index: 10; /* Ensure it's above the game content */
     display: none; /* Initially hide the overlay */
-    cursor: url('/static/shooting_image/v-cursor.cur') auto;
+    cursor: url('/static/shooting_image/default.png'), auto;
 }
 
 #start-button:before {
