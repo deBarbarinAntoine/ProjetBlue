@@ -145,6 +145,24 @@ body {
     gap: 2ch;
 }
 
+.timeBarContainer  {
+    position: absolute; /* Position it absolutely within the game area container */
+    bottom: 0; /* Distance from the bottom */
+    left: 0; /* Distance from the left */
+    width: 100%; /* Full width of the container */
+    height: 2vh; /* Height of the time bar */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for the time container */
+    z-index: 10; /* Ensure it's on top of other elements */
+    overflow: hidden; /* Hide the overflow so the time bar fills within it */
+}
+
+.timeBar {
+    width: 100%;
+    height: 100%;
+    background-color: #4caf50; /* green color for the time left */
+    transition: width 0.1s linear; /* smooth transition effect */
+}
+
 /* CSS */
 .button-30 {
     align-items: center;
@@ -203,4 +221,49 @@ h1{
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Reset default styles */
+input[type="range"] {
+    -webkit-appearance: none; /* Remove default styling */
+    width: 100%; /* Full width */
+    background: transparent; /* Transparent background for custom styles */
+    margin: 10px 0; /* Add some space around the slider */
+}
+
+/* Slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 1.5vh; /* Height of the track */
+    background: #666; /* Dark gray for the track */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); /* Inner shadow for depth */
+}
+
+/* Slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none; /* Remove default styling */
+    width: 1.5vh; /* Width of the thumb */
+    height: 1.5vh; /* Height of the thumb */
+    background: #f00; /* Bright red for the thumb */
+    border: 2px solid #fff; /* White border for the thumb */
+    border-radius: 50%; /* Circular thumb */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+}
+
+/* Slider hover effect */
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #ff3300; /* Slightly brighter red on hover */
+}
+
+.volume-control {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center items vertically */
+}
+
+#volume-icon {
+    width: 3vh; /* Set the width of the icon */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between icon and slider */
 }

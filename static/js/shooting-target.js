@@ -6,16 +6,19 @@ let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
 let soundEnabled = true;
-let remainingTime = 60000; // Total game time in milliseconds
-let timeLeft = 0;
+const maxTime = 60000
+let remainingTime;
 let endGameTimeout;
 let gameStartTime;
 let gameOver = false;
 let baseDifficulty;
-let volume= 0.2;
+let volume = 0;
 let setVolumeSlider = volume * 100;
 let maxDifficulty = 5;
 let randomLeft, randomTop;
+let timeBarAnimationFrame;
+let pauseTime = 0;
+let resumeTime = 0;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -27,7 +30,6 @@ const ambientSound = new Audio('/static/sound_mp3/ambient_sound.mp3');
 ambientSound.loop = true; // Loop the ambient sound
 
 
-
 showPausedOverlay();
 
 // Initialize UI elements
@@ -37,6 +39,8 @@ const gameArea = document.getElementById('game-area');
 const gameAreaCTN = document.querySelector('.game-area-ctn');
 const scoreDisplay = document.getElementById('score');
 const imageElement = document.getElementById('image');
+const timeBarElement = document.querySelector('.timeBar');
+
 
 document.addEventListener('keydown', (event) => {
     // Check if the 'P' key is pressed and the pauseButton is not disabled
@@ -61,12 +65,14 @@ function startGame() {
     gameOver = false;
     imageElement.classList.add('background_image_animation');
     baseDifficulty = difficulty;
+
     // Play the game start sound
     playSound(ambientSound);
     playSound(gameStartSound);
 
-    // Initialize gameStartTime
+    // Initialize gameStartTime and game clock
     gameStartTime = Date.now(); // Set start time
+    remainingTime = maxTime - (Date.now() - gameStartTime)
 
     // Spawn targets based on difficulty
     clearInterval(targetInterval); // Clear any previous intervals
@@ -89,10 +95,32 @@ function startGame() {
 }
 
 function startEndGameTimer() {
-    if (endGameTimeout) clearTimeout(endGameTimeout); // Clear previous timeout if it exists
+    if (endGameTimeout) clearTimeout(endGameTimeout);
+    let timePercentage;
+    const updateTimeBar = () => {
+        remainingTime = maxTime - (Date.now() - gameStartTime)
+        // Calculate percentage of time left and update time bar width*$
+        let timeDifference = (remainingTime / maxTime);
+        timePercentage = (timeDifference * 100);
+
+        timeBarElement.style.width = `${timePercentage}%`;
+        if (timePercentage < 25) {
+            timeBarElement.style.backgroundColor = 'red'; // Change to red when below 25%
+        } else if (timePercentage < 50) {
+            timeBarElement.style.backgroundColor = 'orange'; // Change to orange below 50%
+        } else {
+            timeBarElement.style.backgroundColor = '#4caf50'; // Green for more than 50% time left
+        }
+        if (remainingTime >= 0) {
+            timeBarAnimationFrame = requestAnimationFrame(updateTimeBar); // Continue updating
+        }
+    };
     endGameTimeout = setTimeout(() => {
         endGame(); // Call end game after remaining time
     }, remainingTime);
+
+    // Start updating the time bar
+    updateTimeBar(); // Initial call to start updating the time bar
 }
 
 function spawnTargets() {
@@ -134,7 +162,7 @@ function spawnTargets() {
             validPositionFound = true; // Assume valid until we find a conflict
 
             for (const existing of existingTargets) {
-                const { left: existingLeft, top: existingTop, size: existingSize } = existing;
+                const {left: existingLeft, top: existingTop, size: existingSize} = existing;
 
                 // Calculate distance between the new target and the existing target
                 const distance = Math.sqrt(
@@ -155,7 +183,7 @@ function spawnTargets() {
         target.style.top = randomTop + 'vh';
 
         // Store the position and size of the new target
-        existingTargets.push({ left: randomLeft, top: randomTop, size: scaleFactor });
+        existingTargets.push({left: randomLeft, top: randomTop, size: scaleFactor});
 
         let isBlinking = false; // Flag to track blinking state
 
@@ -266,13 +294,16 @@ function endGame() {
 
 function pauseGame() {
     if (!gameRunning || isPaused) return; // Prevent pausing if game isn't running or already paused
-    isPaused = true; // Set the pause state
-    memory_difficulty = difficulty; // Save current difficulty
-    timeLeft = 60000 - (Date.now() - gameStartTime); // Calculate remaining time
-    gameArea.innerHTML = ''; // Clear game area (consider retaining state instead)
     if (endGameTimeout) clearTimeout(endGameTimeout);
-    // Optional: Show a paused overlay or message
+    isPaused = true; // Set the pause state
+    pauseTime = Date.now()
+    memory_difficulty = difficulty; // Save current difficulty
+    gameArea.innerHTML = ''; // Clear game area (consider retaining state instead)
+
+    // Show a paused overlay or message
     showPausedOverlay();
+    // Cancel time bar update
+    cancelAnimationFrame(timeBarAnimationFrame);
 
     pauseButton.innerText = 'Resume'; // Change button text to "Resume"
 }
@@ -280,12 +311,15 @@ function pauseGame() {
 function resumeGame() {
     if (!gameRunning || !isPaused) return; // Prevent resuming if game isn't running or not paused
     isPaused = false; // Clear the pause state
+    resumeTime = Date.now()
     difficulty = memory_difficulty; // Restore difficulty
-    remainingTime = timeLeft; // Restore remaining time
-    startEndGameTimer(); // Start the timer for the remaining time
+    gameArea.innerHTML = ''; // Clear game area (consider retaining state instead)
+
     pauseButton.innerText = 'Pause'; // Change button text back to "Pause"
+    gameStartTime = gameStartTime + (resumeTime - pauseTime);
 
     // Hide the paused overlay or message
+    startEndGameTimer(); // Start the timer for the remaining time and update time bar
     hidePausedOverlay();
 }
 
@@ -296,7 +330,7 @@ function hidePausedOverlay() {
     }
 }
 
-function returnToMenu(){
+function returnToMenu() {
     gameRunning = false;
     gameOver = false;
     hidePausedOverlay();
@@ -309,7 +343,10 @@ function showPausedOverlay() {
     overlay.id = 'paused-overlay';
     if (isPaused) {
         overlay.innerText = 'Game Paused';
-        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`;
+        overlay.innerHTML = `<div class="volume-control">
+                                 <i id="volume-icon" class="fas fa-volume-mute"></i>
+                                 <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}">
+                             </div>`;
     } else if (!gameRunning && !gameOver) {
         overlay.innerHTML = `<div id="retro-menu" class="menu"> 
                                 <h1 class="menu-title">Shooting Game</h1> 
@@ -317,7 +354,10 @@ function showPausedOverlay() {
                                     <div class="button-30" id="start-button">Start Game</div> 
                                     <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
                                     <div class="button-30" id="fullscreen-button">Fullscreen</div> 
-                                    <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                                    <div class="volume-control">
+                                        <i id="volume-icon" class="fas fa-volume-mute"></i>
+                                        <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}">
+                                    </div>
                                 </div> 
                              </div>`;
     } else if (!gameRunning && gameOver) {
@@ -328,7 +368,10 @@ function showPausedOverlay() {
                                     <li class="button-30" id="restart-button">Restart Game</li> 
                                     <li class="button-30" id="back_to_start-button">Back to Menu</li> 
                                 </ul> 
-                                <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}"> 
+                                <div class="volume-control">
+                                     <i id="volume-icon" class="fas fa-volume-mute"></i>
+                                     <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider}">
+                                </div>
                              </div>`;
     }
     document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
@@ -376,7 +419,27 @@ function showPausedOverlay() {
     // Function to update sound volume based on slider
     document.getElementById('sound-slider').addEventListener('input', function (event) {
         volume = event.target.value / 100;  // Convert slider value to a fraction
+        updateVolumeIcon(event.target.value)
         ambientSound.volume = volume;
     });
 }
+
+const slider = document.getElementById('sound-slider');
+const volumeIcon = document.getElementById('volume-icon');
+
+// Function to update the icon based on the slider value
+function updateVolumeIcon(volume) {
+    if (volume <= 0) {
+        volumeIcon.className = 'fas fa-volume-mute'; // Mute icon
+    } else if (volume > 0 && volume <= 40) {
+        volumeIcon.className = 'fas fa-volume-down'; // Low volume icon
+    } else if (volume > 40 && volume <= 66) {
+        volumeIcon.className = 'fas fa-volume-up'; // Medium volume icon
+    } else {
+        volumeIcon.className = 'fas fa-volume-high'; // High volume icon
+    }
+}
+
+// Initial icon update based on the default value
+updateVolumeIcon(volume * 100);
 
