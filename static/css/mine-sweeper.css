@@ -1,51 +1,129 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     background-color: #f7f7f7;
-
-    /* Change the cursor image */
-    cursor: url('/static/shooting_image/crosshair-cursor.png'), auto;
 }
-
 h1 {
     font-size: 2.5em;
     margin-top: 20px;
 }
-
 p {
     font-size: 1.2em;
     margin-bottom: 20px;
 }
-
 #game-board {
-    display: grid;
-    grid-template-columns: repeat(4, 100px);
-    gap: 10px;
+    display: flex;
+    flex-flow: row wrap;
     justify-content: center;
     margin: 0 auto;
+    border: 3px solid black;
 }
-
-.cell {
-    width: 100px;
-    height: 100px;
-    background-color: #4CAF50;
+#start-btn {
+    align-items: center;
+    background-color: #fee6e3;
+    border: 2px solid #111;
     border-radius: 8px;
+    box-sizing: border-box;
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-family: Inter,sans-serif;
+    font-size: 16px;
+    height: 48px;
+    justify-content: center;
+    line-height: 24px;
+    max-width: 100%;
+    padding: 0 25px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+#start-btn:after {
+    background-color: #111;
+    border-radius: 8px;
+    content: "";
+    display: block;
+    height: 48px;
+    left: 0;
+    width: 100%;
+    position: absolute;
+    top: -2px;
+    transform: translate(8px, 8px);
+    transition: transform .2s ease-out;
+    z-index: -1;
+}
+#start-btn:hover:after {
+    transform: translate(0, 0);
+}
+#start-btn:active {
+    background-color: #ffdeda;
+    outline: 0;
+}
+#start-btn:hover {
+    outline: 0;
+}
+@media (min-width: 768px) {
+    #start-btn {
+        padding: 0 40px;
+    }
+}
+.cell {
+    width: 32px;
+    height: 32px;
+    border: 1px solid black;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2em;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.3s;
+    font-size: 22px;
+    cursor: grab;
 }
-
 .cell.revealed {
     background-color: #f7f7f7;
     color: #4CAF50;
+    cursor: crosshair;
 }
-
+.cell.revealed[data-mine-nb="1"] {
+    color: dodgerblue;
+}
+.cell.revealed[data-mine-nb="2"] {
+    color: darkcyan;
+}
+.cell.revealed[data-mine-nb="3"] {
+    color: orange;
+}
+.cell.revealed[data-mine-nb="4"] {
+    color: lightcoral;
+}
+.cell.revealed[data-mine-nb="5"] {
+    color: orangered;
+}
+.cell.revealed[data-mine-nb="6"] {
+    color: red;
+}
+.cell.revealed[data-mine-nb="7"] {
+    color: maroon;
+}
+.cell.revealed[data-mine-nb="8"] {
+    color: darkmagenta;
+}
 .cell.flagged {
-    background-color: #ccc;
-    color: #fff;
-    pointer-events: none;
+    background-image: url("/static/flag.png");
+}
+.cell.mine {
+    background-color: red;
+}
+.mine-image {
+    object-fit: contain;
+    object-position: center;
+    width: 100%;
+    height: 100%;
 }

@@ -9,14 +9,17 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (gameId === 2) {
             window.location.href = '/memory-match';
         } else if (gameId === 3) {
-            window.location.href = '/reaction-speed';
+            window.location.href = '/shooting-game';
+        } else if (gameId === 4) {
+            window.location.href = '/mine-sweeper';
         }
     }
 
     // Get button elements
     const puzzleGameButton = document.getElementById('play-puzzle-game');
     const memoryMatchButton = document.getElementById('play-memory-match');
-    const reactionSpeedButton = document.getElementById('play-reaction-speed');
+    const shootingGameButton = document.getElementById('play-shooting-game');
+    const mineSweeperButton = document.getElementById('play-mine-sweeper');
 
     // Attach event listeners
     puzzleGameButton.addEventListener('click', function () {
@@ -27,7 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
         startGame(2);
     });
 
-    reactionSpeedButton.addEventListener('click', function () {
+    shootingGameButton.addEventListener('click', function () {
         startGame(3);
+    });
+
+    mineSweeperButton.addEventListener('click', function () {
+        startGame(4);
     });
 });

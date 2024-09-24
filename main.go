@@ -27,9 +27,14 @@ func puzzleGamePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html-page/puzzle-game.html")
 }
 
-// Serve the reaction speed page
-func reactionSpeedPage(w http.ResponseWriter, r *http.Request) {
+// Serve the shooting target page
+func shootingGame(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html-page/shoot-the-target.html")
+}
+
+// Serve the mine sweeper page
+func mineSweeper(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./html-page/mine-sweeper.html")
 }
 
 // Middleware for adding basic security headers
@@ -73,7 +78,8 @@ func main() {
 	mux.HandleFunc("/", homePage)
 	mux.HandleFunc("/memory-match", memoryMatchPage)
 	mux.HandleFunc("/puzzle-game", puzzleGamePage)
-	mux.HandleFunc("/reaction-speed", reactionSpeedPage)
+	mux.HandleFunc("/shooting-game", shootingGame)
+	mux.HandleFunc("/mine-sweeper", mineSweeper)
 
 	// Serve a custom 404 page for any unknown routes
 	mux.HandleFunc("/404", notFoundHandler)

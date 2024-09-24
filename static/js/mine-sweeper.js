@@ -5,8 +5,7 @@ let width = 8;
 let height = 8;
 let boardLength = width * height;
 let mineNb = 12;
-let mine = '';
-let flag = '';
+let mine = 'M';
 
 
 function randomIntFromInterval(min, max) { // min and max included
@@ -83,46 +82,82 @@ function printBoardDebug(board) {
     }
 }
 
-function init() {
-    initBoard();
-    // DEBUG
-    printBoardDebug(board);
-}
-
-init();
+// game and style variables
+const cellWidth = 32;
+const boardElem = document.querySelector('#game-board');
 
 function timer() {
 
 }
 
-// for mouse events ⤵
-let button = document.querySelector("#button");
-button.addEventListener("mouseup", (e) => {
-    let log = document.querySelector("#log");
-    switch (e.button) {
-        case 0:
-            log.textContent = "Left button clicked.";
-            break;
-        case 1:
-            log.textContent = "Middle button clicked.";
-            break;
-        case 2:
-            log.textContent = "Right button clicked.";
-            break;
-        default:
-            log.textContent = `Unknown button code: ${e.button}`;
+function displayBlankBoard() {
+    boardElem.innerHTML = '';
+    boardElem.style.width = (width * (cellWidth + 1) - 2) + 'px';
+    boardElem.style.height = 'fit-content';
+    for (let i = 0; i < boardLength; i++) {
+        const cellElem = document.createElement('div');
+        cellElem.classList.add('cell');
+        cellElem.setAttribute('data-id', `${i}`);
+        boardElem.appendChild(cellElem);
     }
-});
-
-
-function leftClick() {
-
 }
 
-function rightClick() {
+function play() {
+    initBoard();
+    // DEBUG
+    printBoardDebug(board);
+    displayBlankBoard();
 
+    // getting all cells
+    const cells = document.querySelectorAll('.cell');
+
+    // add event listener for every cell
+    cells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            // DEBUG
+            console.log('click');
+
+            // cloning the cell to remove the eventListeners
+            const cellClone = cell.cloneNode(true);
+            cell.parentNode.replaceChild(cellClone, cell);
+            cell = cellClone;
+
+            cell.classList.add('revealed');
+            const value = board[cell.dataset.id];
+            switch (value) {
+                case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+                    cell.innerText = value;
+                    cell.dataset.mineNb = `${value}`;
+                    break;
+                case 'M':
+                    cell.innerHTML = '<img class="mine-image" src="/static/mine.svg" alt="mine image">';
+                    cell.classList.add('mine');
+                    break;
+                default:
+            }
+        })
+    });
 }
 
-function bothClick() {
+const startBtn = document.querySelector('#start-btn');
+startBtn.addEventListener('click', play)
 
-}
+
+// for mouse events ⤵
+// let button = document.querySelector("#button");
+// button.addEventListener("mouseup", (e) => {
+//     let log = document.querySelector("#log");
+//     switch (e.button) {
+//         case 0:
+//             log.textContent = "Left button clicked.";
+//             break;
+//         case 1:
+//             log.textContent = "Middle button clicked.";
+//             break;
+//         case 2:
+//             log.textContent = "Right button clicked.";
+//             break;
+//         default:
+//             log.textContent = `Unknown button code: ${e.button}`;
+//     }
+// });
