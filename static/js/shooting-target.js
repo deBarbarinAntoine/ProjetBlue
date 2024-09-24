@@ -37,13 +37,15 @@ const gameAreaCTN = document.querySelector('.game-area-ctn');
 const scoreDisplay = document.getElementById('score');
 const imageElement = document.getElementById('image');
 
-// Update the event listener for the pause button
-pauseButton.addEventListener('click', () => {
-    if (gameRunning) {
-        if (isPaused) {
-            resumeGame(); // Call resume function if game is paused
-        } else {
-            pauseGame(); // Call pause function if game is running
+document.addEventListener('keydown', (event) => {
+    // Check if the 'P' key is pressed and the pauseButton is not disabled
+    if ((event.key === 'p' || event.key === 'P') && !pauseButton.disabled) {
+        if (gameRunning) {
+            if (isPaused) {
+                resumeGame(); // Call resume function if the game is paused
+            } else {
+                pauseGame(); // Call pause function if the game is running
+            }
         }
     }
 });
