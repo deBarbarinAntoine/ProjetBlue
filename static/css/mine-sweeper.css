@@ -17,9 +17,7 @@ p {
     margin-bottom: 20px;
 }
 #game-board {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
+    display: grid;
     margin: 0 auto;
     border: 3px solid black;
 }
