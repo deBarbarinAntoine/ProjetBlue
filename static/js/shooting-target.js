@@ -1,21 +1,19 @@
 let score = 0;
 let gameRunning = false;
+let isPaused = false; // Track whether the game is paused
 let difficulty;
-let targetInterval;
-let difficultyInterval;
+let targetInterval = null; // Initialize with null
+let difficultyInterval = null; // Initialize with null
+let memory_difficulty = 0;
 let soundEnabled = true;
 let remainingTime = 60000; // Total game time in milliseconds
+let timeLeft = 0;
 let endGameTimeout;
 let gameStartTime;
-let pauseStartTime; // Variable to store when the game was paused
-let pauseDuration; // Variable to accumulate the total pause time
+let gameOver = false;
 
 // Sound effects
-const hitSounds = [
-    new Audio('/static/sound_mp3/enemy_hurt1.mp3'),
-    new Audio('/static/sound_mp3/enemy_hurt2.mp3'),
-    new Audio('/static/sound_mp3/enemy_hurt3.mp3')
-];
+const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
 const missSound = new Audio('/static/sound_mp3/enemy_missed.mp3');
 const allyHitSound = new Audio('/static/sound_mp3/ally_shot.mp3');
 const gameStartSound = new Audio('/static/sound_mp3/game_start.mp3');
@@ -23,24 +21,28 @@ const playerShotSound = new Audio('/static/sound_mp3/player_gun_shot.mp3');
 const ambientSound = new Audio('/static/sound_mp3/ambient_sound.mp3');
 ambientSound.loop = true; // Loop the ambient sound
 
-
+showPausedOverlay();
+console.log("loaded")
 // Initialize UI elements
 const startButton = document.getElementById('start-button');
 const pauseButton = document.getElementById('pause-button');
 const gameArea = document.getElementById('game-area');
 const scoreDisplay = document.getElementById('score');
-const messageElement = document.getElementById('message');
+const imageElement = document.getElementById('image');
 
 // Event listeners
 startButton.addEventListener('click', startGame);
 // Update the event listener for the pause button
 pauseButton.addEventListener('click', () => {
     if (gameRunning) {
-        pauseGame();
-    } else {
-        resumeGame();
+        if (isPaused) {
+            resumeGame(); // Call resume function if game is paused
+        } else {
+            pauseGame(); // Call pause function if game is running
+        }
     }
 });
+
 
 function startGame() {
     score = 0; // Reset score
@@ -49,6 +51,7 @@ function startGame() {
     gameArea.innerHTML = ''; // Clear the area for new targets
     updateScore();
     pauseButton.disabled = false;
+    imageElement.classList.add('background_image_animation');
 
     // Play the game start sound
     playSound(ambientSound);
@@ -60,14 +63,15 @@ function startGame() {
     // Spawn targets based on difficulty
     clearInterval(targetInterval); // Clear any previous intervals
     targetInterval = setInterval(() => {
-        if (!gameRunning) return;
-        spawnTargets();
+        if (gameRunning && !isPaused) {
+            spawnTargets();
+        }
     }, 3000 / difficulty); // Spawn targets faster as difficulty increases
 
     // Increase difficulty every 9 seconds
     clearInterval(difficultyInterval); // Clear any previous difficulty intervals
     difficultyInterval = setInterval(() => {
-        if (gameRunning) {
+        if (gameRunning && !isPaused) {
             difficulty += 1; // Increase difficulty over time
         }
     }, 9000);
@@ -79,9 +83,10 @@ function startGame() {
 }
 
 function startEndGameTimer() {
+    if (endGameTimeout) clearTimeout(endGameTimeout); // Clear previous timeout if it exists
     endGameTimeout = setTimeout(() => {
-        endGame();
-    }, remainingTime); // Use remaining time
+        endGame(); // Call end game after remaining time
+    }, remainingTime);
 }
 
 function spawnTargets() {
@@ -91,6 +96,7 @@ function spawnTargets() {
         const target = document.createElement('div');
         const isEnemy = Math.random() > 0.4; // 60% chance it's an enemy
         target.classList.add('target', isEnemy ? 'enemy' : 'friendly');
+        target.classList.add('message');
 
         // Random position for the target
         const randomLeft = Math.random() * 85; // left between 0 and 85vw
@@ -112,18 +118,42 @@ function spawnTargets() {
             // Set blinking state
             isBlinking = true;
 
+            // Create a span element to display the score change on top of the target
+            const scoreDisplay = document.createElement('span');
+            scoreDisplay.classList.add('score-display'); // Add a class for styling
+            scoreDisplay.style.position = 'absolute';
+            scoreDisplay.style.left = '50%';
+            scoreDisplay.style.top = '-30px'; // Position it slightly above the target
+            scoreDisplay.style.transform = 'translateX(-50%)';
+            scoreDisplay.style.color = isEnemy ? 'green' : 'red'; // Green for hit, red for miss
+            scoreDisplay.style.fontWeight = 'bold';
+            scoreDisplay.style.fontSize = '18px'; // Adjust size as needed
+            scoreDisplay.innerText = isEnemy ? "+10" : "-5"; // Show +10 for enemies, -5 for friendlies
+
+            target.appendChild(scoreDisplay); // Append the score display to the target
+
+            // Animate the score display to fade out and move up
             setTimeout(() => {
+                scoreDisplay.style.transition = 'opacity 1s, transform 1s'; // Smooth transition for fading and moving up
+                scoreDisplay.style.opacity = '0'; // Fade out
+                scoreDisplay.style.transform = 'translateX(-50%) translateY(-20px)'; // Move up slightly
+            }, 100); // Small delay before animation starts
+
+            // Remove the score display after the animation completes
+            setTimeout(() => {
+                if (scoreDisplay.parentNode) {
+                    scoreDisplay.parentNode.removeChild(scoreDisplay); // Remove the score display element
+                }
+            }, 1100); // Wait until the fade-out animation finishes
+
                 if (isEnemy) {
-                    playSound(hitSounds[Math.floor(Math.random() * hitSounds.length)]);
+                    playSound(hitSounds);
                     score += 10; // Gain points for hitting enemy
-                    showMessage("Hit Enemy! +10 points", 'green', false);
                 } else {
                     playSound(allyHitSound);
                     score -= 5; // Lose points for hitting friendly
-                    showMessage("Hit Friendly! -5 points", 'red', false);
                 }
                 updateScore();
-            }, 300);
 
             // Add blinking animation immediately
             target.classList.add('blink');
@@ -143,9 +173,12 @@ function spawnTargets() {
         setTimeout(() => {
             if (gameArea.contains(target)) {
                 if (isEnemy && !target.classList.contains('blink')) {
-                    playSound(missSound);
+                    // Play sound without pausing
+                    if (missSound.paused) {
+                        missSound.currentTime = 0; // Reset to the start
+                        missSound.play();
+                    }
                     score -= 5; // Lose points for missing an enemy
-                    showMessage("Missed Enemy! -5 points", 'red', false);
                 }
                 gameArea.removeChild(target);
                 updateScore();
@@ -158,16 +191,6 @@ function updateScore() {
     scoreDisplay.innerText = score;
 }
 
-function showMessage(message, color, isPause) {
-    messageElement.innerText = message;
-    messageElement.style.color = color;
-    if (!isPause) {
-        setTimeout(() => {
-            messageElement.innerText = '';
-        }, 1000);
-    }
-}
-
 function playSound(audioElement) {
     if (!soundEnabled) return; // Prevent playing sound if muted
     if (!audioElement.paused) {
@@ -176,58 +199,6 @@ function playSound(audioElement) {
     }
     audioElement.volume = 0.5;
     audioElement.play();
-}
-
-function pauseGame() {
-    if (!gameRunning) return; // Do nothing if the game is already paused
-
-    gameRunning = false; // Set the game state to paused
-    clearInterval(targetInterval); // Stop spawning targets
-    clearInterval(difficultyInterval); // Stop increasing difficulty
-    clearTimeout(endGameTimeout); // Stop the end game timer
-
-    // Calculate the remaining time
-    pauseStartTime = Date.now(); // Record the time when the game was paused
-    remainingTime = 60000 - (pauseStartTime - gameStartTime); // gameStartTime should be set when the game starts
-
-    pauseButton.innerText = 'Resume'; // Change button text to indicate resume
-
-    // Optionally, you can show a pause message
-    showMessage("Game Paused", 'blue', true);
-
-    // Disable the start button and mute button
-    startButton.disabled = true;
-    muteButton.disabled = true;
-}
-
-function resumeGame() {
-    gameRunning = true; // Set the game state to running
-    pauseButton.innerText = 'Pause'; // Change button text back to pause
-    messageElement.innerText = '';
-
-    // Restart target spawning and difficulty increase
-    targetInterval = setInterval(() => {
-        if (!gameRunning) return;
-        spawnTargets();
-    }, 3000 / difficulty);
-
-    difficultyInterval = setInterval(() => {
-        if (gameRunning) {
-            difficulty += 1; // Increase difficulty over time
-        }
-    }, 9000);
-    // Calculate pause duration
-    pauseDuration = Date.now() - pauseStartTime;
-
-    // add pause time back to timer
-    remainingTime += pauseDuration;
-
-    // Restart the end game timer
-    startEndGameTimer();
-
-    // Enable the start button and mute button
-    startButton.disabled = false;
-    muteButton.disabled = false;
 }
 
 function endGame() {
@@ -244,6 +215,7 @@ function endGame() {
         document.body.removeChild(restartButton);
     });
     document.body.appendChild(restartButton);
+    gameOver = true
 }
 
 function restartGame() {
@@ -266,3 +238,51 @@ function toggleSound() {
     soundEnabled = !soundEnabled;
     muteButton.innerText = soundEnabled ? 'Mute' : 'Unmute';
 }
+
+function pauseGame() {
+    if (!gameRunning || isPaused) return; // Prevent pausing if game isn't running or already paused
+    isPaused = true; // Set the pause state
+    memory_difficulty = difficulty; // Save current difficulty
+    timeLeft = 60000 - (Date.now() - gameStartTime); // Calculate remaining time
+    gameArea.innerHTML = ''; // Clear game area (consider retaining state instead)
+    if (endGameTimeout) clearTimeout(endGameTimeout);
+    // Optional: Show a paused overlay or message
+    showPausedOverlay();
+
+    pauseButton.innerText = 'Resume'; // Change button text to "Resume"
+}
+
+function resumeGame() {
+    if (!gameRunning || !isPaused) return; // Prevent resuming if game isn't running or not paused
+    isPaused = false; // Clear the pause state
+    difficulty = memory_difficulty; // Restore difficulty
+    remainingTime = timeLeft; // Restore remaining time
+    startEndGameTimer(); // Start the timer for the remaining time
+    pauseButton.innerText = 'Pause'; // Change button text back to "Pause"
+
+    // Optional: Hide the paused overlay or message
+    hidePausedOverlay();
+}
+
+// functions for showing/hiding a paused overlay
+function showPausedOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'paused-overlay';
+    if (isPaused){
+        overlay.innerText = 'Game Paused';
+    }else if (!gameRunning && !gameOver) {
+        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <ul class="menu-options"> <li class="menu-option" id="start-button">Start Game</li> </ul> </div>'
+    } else if (!gameRunning) {
+        overlay.innerText = 'Game Over';
+    }
+    document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
+    overlay.style.display = 'flex'; // Show the overlay
+}
+
+function hidePausedOverlay() {
+    const overlay = document.getElementById('paused-overlay');
+    if (overlay) {
+        overlay.style.display = 'none'; // Hide overlay instead of removing
+    }
+}
+
