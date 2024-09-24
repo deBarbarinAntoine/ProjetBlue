@@ -1,7 +1,7 @@
 let score = 0;
 let gameRunning = false;
 let isPaused = false; // Track whether the game is paused
-let difficulty;
+let difficulty = 1;
 let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
@@ -11,6 +11,8 @@ let timeLeft = 0;
 let endGameTimeout;
 let gameStartTime;
 let gameOver = false;
+let difficultyLevel = 1
+let volume= 0.5;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -21,17 +23,18 @@ const playerShotSound = new Audio('/static/sound_mp3/player_gun_shot.mp3');
 const ambientSound = new Audio('/static/sound_mp3/ambient_sound.mp3');
 ambientSound.loop = true; // Loop the ambient sound
 
+
+
 showPausedOverlay();
-console.log("loaded")
+
 // Initialize UI elements
-const startButton = document.getElementById('start-button');
+
 const pauseButton = document.getElementById('pause-button');
 const gameArea = document.getElementById('game-area');
+const gameAreaCTN = document.querySelector('.game-area-ctn');
 const scoreDisplay = document.getElementById('score');
 const imageElement = document.getElementById('image');
 
-// Event listeners
-startButton.addEventListener('click', startGame);
 // Update the event listener for the pause button
 pauseButton.addEventListener('click', () => {
     if (gameRunning) {
@@ -46,11 +49,12 @@ pauseButton.addEventListener('click', () => {
 
 function startGame() {
     score = 0; // Reset score
-    difficulty = 1; // set / Reset difficulty
     gameRunning = true;
+    difficulty = difficultyLevel;
     gameArea.innerHTML = ''; // Clear the area for new targets
     updateScore();
     pauseButton.disabled = false;
+    gameOver = false;
     imageElement.classList.add('background_image_animation');
 
     // Play the game start sound
@@ -78,8 +82,6 @@ function startGame() {
 
     // Start the end game timer
     startEndGameTimer();
-
-    startButton.disabled = true; // Disable start button
 }
 
 function startEndGameTimer() {
@@ -146,14 +148,14 @@ function spawnTargets() {
                 }
             }, 1100); // Wait until the fade-out animation finishes
 
-                if (isEnemy) {
-                    playSound(hitSounds);
-                    score += 10; // Gain points for hitting enemy
-                } else {
-                    playSound(allyHitSound);
-                    score -= 5; // Lose points for hitting friendly
-                }
-                updateScore();
+            if (isEnemy) {
+                playSound(hitSounds);
+                score += 10; // Gain points for hitting enemy
+            } else {
+                playSound(allyHitSound);
+                score -= 5; // Lose points for hitting friendly
+            }
+            updateScore();
 
             // Add blinking animation immediately
             target.classList.add('blink');
@@ -177,6 +179,7 @@ function spawnTargets() {
                     if (missSound.paused) {
                         missSound.currentTime = 0; // Reset to the start
                         missSound.play();
+                        missSound.volume = volume
                     }
                     score -= 5; // Lose points for missing an enemy
                 }
@@ -197,38 +200,21 @@ function playSound(audioElement) {
         audioElement.pause();
         audioElement.currentTime = 0;
     }
-    audioElement.volume = 0.5;
+    audioElement.volume = volume;
     audioElement.play();
 }
 
 function endGame() {
     ambientSound.pause();
     gameRunning = false;
+    pauseButton.disabled = true;
     clearInterval(targetInterval);
     clearInterval(difficultyInterval);
-    alert("Game Over! Final Score: " + score);
     gameArea.innerHTML = ''; // Clear all targets
-    const restartButton = document.createElement('button');
-    restartButton.innerText = 'Restart';
-    restartButton.addEventListener('click', () => {
-        restartGame();
-        document.body.removeChild(restartButton);
-    });
-    document.body.appendChild(restartButton);
-    gameOver = true
+    gameOver = true;
+    showPausedOverlay()
 }
 
-function restartGame() {
-    score = 0;
-    difficulty = 1;
-    gameArea.innerHTML = ''; // Clear all targets
-    updateScore();
-    startButton.disabled = false; // Enable start button
-    gameRunning = false;
-}
-
-// Start button UI setup
-startButton.disabled = false; // Ensure start button is enabled initially
 
 // Mute button
 const muteButton = document.getElementById('mute-button');
@@ -260,23 +246,8 @@ function resumeGame() {
     startEndGameTimer(); // Start the timer for the remaining time
     pauseButton.innerText = 'Pause'; // Change button text back to "Pause"
 
-    // Optional: Hide the paused overlay or message
+    // Hide the paused overlay or message
     hidePausedOverlay();
-}
-
-// functions for showing/hiding a paused overlay
-function showPausedOverlay() {
-    const overlay = document.createElement('div');
-    overlay.id = 'paused-overlay';
-    if (isPaused){
-        overlay.innerText = 'Game Paused';
-    }else if (!gameRunning && !gameOver) {
-        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <ul class="menu-options"> <li class="menu-option" id="start-button">Start Game</li> <li class="menu-option" id="option-button">Game Stage</li> <li class="menu-option" id="screen-button">Screen</li> <li class="menu-option" id="sound-button">Sound</li> </ul> </div>'
-    } else if (!gameRunning) {
-        overlay.innerText = 'Game Over';
-    }
-    document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
-    overlay.style.display = 'flex'; // Show the overlay
 }
 
 function hidePausedOverlay() {
@@ -285,4 +256,64 @@ function hidePausedOverlay() {
         overlay.style.display = 'none'; // Hide overlay instead of removing
     }
 }
+function returnToMenu(){
+    gameRunning = false;
+    gameOver = false;
+    hidePausedOverlay();
+    showPausedOverlay();
+}
+
+// functions for showing/hiding a paused overlay
+function showPausedOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'paused-overlay';
+    if (isPaused) {
+        overlay.innerText = 'Game Paused';
+        overlay.innerHTML = `<input type="range" id="sound-slider" min="0" max="100" value="50">`
+    } else if (!gameRunning && !gameOver) {
+        overlay.innerHTML = '<div id="retro-menu" class="menu"> <h1 class="menu-title">Shooting Game</h1> <div class="menu-options"> <div class="button-30" id="start-button">Start Game</div> <div class="button-30" id="option-button">Difficulty</div> <div class="button-30" id="fullscreen-button">Fullscreen</div> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div> </div>'
+    } else if (!gameRunning && gameOver) {
+        overlay.innerHTML = `<div id="retro-menu" class="menu"> <h1 class="menu-title">Game Over</h1> <h1 class="menu-title">You did ${score} points !</h1> <ul class="menu-options"> <li class="button-30" id="restart-button">Restart Game</li> <li class="button-30" id="back_to_start-button">Back to Menu</li> </ul> <input type="range" id="sound-slider" min="0" max="100" value="50"> </div>`
+    }
+    document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
+    overlay.style.display = 'flex'; // Show the overlay
+
+    let startButton = document.getElementById('start-button');
+    if(!!startButton){
+        startButton.addEventListener('click', startGame);
+    }
+
+    const restartButton = document.getElementById('restart-button');
+    if (!!restartButton) {
+        restartButton.addEventListener('click', startGame);
+    }
+
+    const back_to_start = document.getElementById('back_to_start-button');
+    if (!!back_to_start) {
+        back_to_start.addEventListener('click',returnToMenu);
+    }
+
+    const fullscreen = document.getElementById('fullscreen-button');
+    if (!!fullscreen) {
+        fullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                // Enter full screen
+                gameAreaCTN.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                // Exit full screen
+                document.exitFullscreen();
+            }
+        });
+    }
+    // Function to update sound volume based on slider
+    document.getElementById('sound-slider').addEventListener('input', function (event) {
+        volume = event.target.value / 100;  // Convert slider value to a fraction
+        ambientSound.volume = volume;
+    });
+}
+
+
+
 
