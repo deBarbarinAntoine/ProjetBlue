@@ -45,6 +45,7 @@ body {
     border: 2px solid black;
     margin: 0 auto;
     position: relative;
+    user-select: none;
 }
 
 .target {
@@ -266,4 +267,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     width: 3vh; /* Set the width of the icon */
     height: auto; /* Maintain aspect ratio */
     margin-right: 10px; /* Space between icon and slider */
+}
+
+.affichage-30{
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent background for readability */
+    color: white; /* Score text color */
+    padding: 5px; /* Some padding for aesthetics */
+    border-radius: 5px; /* Rounded corners */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2ch;
 }
