@@ -6,7 +6,7 @@ let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
 let soundEnabled = true;
-const maxTime = 60000
+const maxTime = 1000
 let remainingTime;
 let endGameTimeout;
 let gameStartTime;
@@ -30,7 +30,7 @@ const ambientSound = new Audio('/static/sound_mp3/ambient_sound.mp3');
 ambientSound.loop = true; // Loop the ambient sound
 const bossHitSound = new Audio('/static/sound_mp3/bossHit.mp3');
 const bossSpawnSound = new Audio('/static/sound_mp3/bossSpawnSound.mp3');
-const startClicSound = new Audio('/static/sound_mp3/buttonStartClic.mp3');
+const startClickSound = new Audio('/static/sound_mp3/buttonStartClic.mp3');
 const gameOverSound = new Audio('/static/sound_mp3/gameOverSound.mp3');
 
 
@@ -374,7 +374,7 @@ async function showPausedOverlay() {
     let timeToShow = Math.floor(remainingTime / 1000)
     if (isPaused) {
         overlay.innerText = 'Game Paused';
-        overlay.innerHTML = `<div id="retro-menu" class="menu">
+        overlay.innerHTML = `<div id="retro-menue" class="menu">
                                 <h1 class="menu-title">Pause Menu</h1> 
                                 <div class="menu-options"> 
                                     <div class="button-30" id="restart-button">Restart Game</div> 
@@ -388,7 +388,7 @@ async function showPausedOverlay() {
                                 </div>
                              </div>`;
     } else if (!gameRunning && !gameOver) {
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+        overlay.innerHTML = `<div id="retro-menue" class="menu"> 
                             <h1 class="menu-title">Shooting Game</h1> 
                             <div class="menu-options"> 
                                 <div class="button-30" id="start-button">Start Game</div> 
@@ -405,7 +405,7 @@ async function showPausedOverlay() {
                             </div> 
                          </div>`;
     } else if (!gameRunning && gameOver) {
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+        overlay.innerHTML = `<div id="retro-menue" class="menu"> 
                                 <h1 class="menu-title">Game Over</h1> 
                                 <h1 class="menu-title">You did ${score} points !</h1> 
                                 <ul class="menu-options"> 
@@ -426,21 +426,28 @@ async function showPausedOverlay() {
 
     let startButton = document.getElementById('start-button');
     if (startButton) {
-        playSound(startClicSound)
-        startButton.addEventListener('click', startGame);
+        startButton.addEventListener('click', () =>{
+            playSound(startClickSound)
+            startGame()
+        });
     }
 
     const restartButton = document.getElementById('restart-button');
     if (restartButton) {
-        playSound(startClicSound)
-        restartButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click',() =>{
+            playSound(startClickSound)
+            startGame()
+        });
     }
 
     const back_to_start = document.getElementById('back_to_start-button');
     if (back_to_start) {
-        playSound(startClicSound)
-        back_to_start.addEventListener('click', returnToMenu);
+        back_to_start.addEventListener('click',() =>{
+            playSound(startClickSound)
+            returnToMenu()
+        });
     }
+
 
     const fullscreen = document.getElementById('fullscreen-button');
     if (fullscreen) {
