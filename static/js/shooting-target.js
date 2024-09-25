@@ -6,7 +6,7 @@ let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
 let soundEnabled = true;
-const maxTime = 1000
+const maxTime = 60000
 let remainingTime;
 let endGameTimeout;
 let gameStartTime;
@@ -98,10 +98,10 @@ function startGame() {
     difficultyInterval = setInterval(() => {
         if (gameRunning && !isPaused) {
             difficulty += 1; // Increase difficulty over time
-            if (difficulty === 4) {
+            if (difficulty >= 4 && difficulty < 7) {
                 const backgroundImage = document.querySelector('.game-area-ctn img');
                 backgroundImage.src = "/static/shooting_image/map2.gif";
-            } else if (difficulty === 7) {
+            } else if (difficulty >= 7) {
                 const backgroundImage = document.querySelector('.game-area-ctn img');
                 backgroundImage.src = "/static/shooting_image/map3.gif";
             }
