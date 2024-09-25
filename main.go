@@ -96,6 +96,48 @@ func saveScoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func retrieveScoreHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if the request method is GET
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// File path for storing the scores
+	filePath := "./static/shooting-scores.json"
+
+	// Lock to prevent concurrent access to the file
+	fileLock.Lock()
+	defer fileLock.Unlock()
+
+	// Read existing scores from file
+	file, err := os.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// If the file does not exist, return an empty score list
+			w.Header().Set("Content-Type", "application/json")
+			_, err := w.Write([]byte("[]"))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			return
+		}
+		http.Error(w, "Error reading the scores file", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the response header for JSON content type
+	w.Header().Set("Content-Type", "application/json")
+
+	// Write the scores back to the response
+	_, err = w.Write(file)
+	if err != nil {
+		http.Error(w, "Error writing the scores to response", http.StatusInternalServerError)
+		return
+	}
+}
+
 // Serve the homepage
 func homePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html-page/index.html")
@@ -165,8 +207,9 @@ func main() {
 	mux.HandleFunc("/shooting-game", shootingGame)
 	mux.HandleFunc("/mine-sweeper", mineSweeper)
 
-	// New AJAX endpoint to save score
+	// AJAX endpoint to save and retrieve score
 	mux.HandleFunc("/save-score", saveScoreHandler)
+	mux.HandleFunc("/get-save-score", retrieveScoreHandler) // Fixed the endpoint path
 
 	// Serve a custom 404 page for any unknown routes
 	mux.HandleFunc("/404", notFoundHandler)

@@ -1,0 +1,62 @@
+1. Analyse Préliminaire du Jeu
+a. Étude du Gameplay
+Mécaniques principales : Virtua Cop est un jeu de tir sur rail où le joueur doit viser et tirer sur des ennemis à l'écran, tout en évitant de blesser des civils. Le jeu se déroule automatiquement, laissant au joueur la tâche de viser rapidement et avec précision.
+Éléments influençant le temps de réflexion et la réactivité :
+Vitesse des ennemis : Plus les ennemis apparaissent rapidement, plus le joueur doit réagir rapidement. Certains ennemis lancent des attaques presque instantanées, obligeant une réaction rapide.
+Zones de tir critiques : Certains ennemis sont plus vulnérables dans des zones spécifiques, ce qui demande au joueur de prioriser certaines cibles pour optimiser ses tirs.
+Gestion de la munition : Recharger au bon moment sans perdre le rythme du jeu demande une bonne stratégie et anticipation.
+
+b. Temps de Réflexion et Réactivité
+Les moments critiques incluent le choix des cibles prioritaires, la gestion des munitions, et la nécessité d'éviter les civils. Le joueur doit constamment anticiper les mouvements des ennemis tout en gardant un œil sur les menaces imminentes.
+
+c. Points forts et faibles
+Points forts :
+Immersion rapide grâce à des commandes simples (viser et tirer).
+Le rythme rapide et l'intensité des actions maintiennent l'attention du joueur.
+
+Points faibles :
+Répétitivité : Au fil du temps, le jeu peut sembler répétitif car les mécaniques ne varient pas beaucoup.
+Faible diversité des ennemis : Une variation plus riche dans les types d’ennemis et leurs comportements pourrait rendre le jeu plus intéressant.
+
+2. Proposition et Justification des Améliorations
+a. Propositions de nouvelles fonctionnalités
+
+Quelques idées envisager :
+
+Ajout d’un mode "bullet time" (ralentissement du temps) : Ce mode pourrait permettre au joueur de ralentir temporairement l’action pour viser avec plus de précision et réfléchir stratégiquement à l’ordre des cibles. Cela rendrait le jeu plus dynamique, tout en ajoutant une couche stratégique et en évitant que le joueur se sente dépassé par des situations trop rapides.
+
+Nouveaux types d’ennemis : Par exemple, des ennemis avec des boucliers qui nécessitent plusieurs tirs ou un tir bien placé pour être neutralisés, ou des ennemis volants qui bougent plus rapidement dans des directions imprévisibles.
+
+Environnement destructible : Donner la possibilité aux joueurs de tirer sur des objets dans l’environnement (fenêtres, barils explosifs, etc.) pour affecter le gameplay pourrait créer des options tactiques supplémentaires.
+
+Système de combo de précision : Récompenser le joueur pour les tirs à la tête ou les tirs parfaits, ce qui pourrait influencer directement le score et encourager les joueurs à être plus précis.
+
+b. Justification analytique
+Bullet time : Cette fonctionnalité introduit un élément de contrôle supplémentaire pour le joueur dans des situations tendues. Cela peut augmenter le temps de réflexion, mais de manière positive, en permettant des moments de stratégie plus poussés sans briser le rythme rapide du jeu.
+
+Nouveaux types d'ennemis : En ajoutant des ennemis avec des comportements variés, tu introduis plus de diversité dans la manière de jouer. Cela incite le joueur à ajuster ses stratégies de tir et maintient l'intérêt à long terme.
+
+Environnement destructible : Cela permettrait de rendre le monde du jeu plus interactif, ce qui enrichirait l'immersion et créerait de nouvelles façons de gérer les menaces.
+
+c. Prototype et démonstration
+Lors de la démonstration, montrer comment ces fonctionnalités ajoutent de la profondeur sans altérer l’esprit du jeu original. Par exemple, activer le "bullet time" dans un moment critique pour montrer comment cela améliore la prise de décision du joueur.
+
+3. Implémentation et Développement
+a. Développement de la version améliorée
+Utiliser un moteur comme Unity, qui est couramment utilisé pour ce genre de jeux, pourrait être une option pour implémenter les améliorations. S'asurrer que les nouvelles fonctionnalités (ralentissement du temps, nouveaux ennemis, etc.) s’intègrent naturellement dans le gameplay sans déséquilibrer la difficulté.
+
+b. Tests de gameplay
+Lors des tests, s'assurer que chaque nouvelle fonctionnalité enrichit réellement l'expérience sans alourdir l'action ou rendre le jeu trop facile.
+
+c. Optimisation
+Optimiser les performances est crucial, surtout si il y a ajout d'éléments comme l’environnement destructible ou des effets de ralentissement. Ces fonctionnalités doivent fonctionner de manière fluide sur différentes configurations matérielles.
+
+4. Présentation et Persuasion
+a. Pitch de la fonctionnalité
+Lors du pitch, tu devras expliquer comment chaque fonctionnalité améliore le jeu tout en respectant son esprit d'origine. Par exemple, le mode "bullet time" n’est pas là pour rendre le jeu plus facile, mais pour ajouter de la stratégie dans des moments de forte tension.
+
+b. Démonstration en direct
+Montre des séquences de gameplay avant et après l’ajout des nouvelles fonctionnalités. Cela permet au jury de voir directement la valeur ajoutée des améliorations.
+
+c. Débat et feedback
+Se Prépare à défendre les choix en expliquant comment les propositions répondent aux critiques potentielles, par exemple que le mode bullet time pourrait trop faciliter le jeu. Insiste sur le fait que ces fonctionnalités offrent une meilleure expérience sans trahir l'ADN du jeu d'arcade rapide.

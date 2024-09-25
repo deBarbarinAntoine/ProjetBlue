@@ -30,7 +30,7 @@ const ambientSound = new Audio('/static/sound_mp3/ambient_sound.mp3');
 ambientSound.loop = true; // Loop the ambient sound
 const bossHitSound = new Audio('/static/sound_mp3/bossHit.mp3');
 const bossSpawnSound = new Audio('/static/sound_mp3/bossSpawnSound.mp3');
-const startClicSound = new Audio('/static/sound_mp3/buttonStartClic.mp3');
+const startClickSound = new Audio('/static/sound_mp3/buttonStartClic.mp3');
 const gameOverSound = new Audio('/static/sound_mp3/gameOverSound.mp3');
 
 
@@ -98,10 +98,10 @@ function startGame() {
     difficultyInterval = setInterval(() => {
         if (gameRunning && !isPaused) {
             difficulty += 1; // Increase difficulty over time
-            if (difficulty === 4) {
+            if (difficulty >= 4 && difficulty < 7) {
                 const backgroundImage = document.querySelector('.game-area-ctn img');
                 backgroundImage.src = "/static/shooting_image/map2.gif";
-            } else if (difficulty === 7) {
+            } else if (difficulty >= 7) {
                 const backgroundImage = document.querySelector('.game-area-ctn img');
                 backgroundImage.src = "/static/shooting_image/map3.gif";
             }
@@ -358,13 +358,23 @@ function returnToMenu() {
 }
 
 // functions for showing/hiding a paused overlay
-function showPausedOverlay() {
+async function showPausedOverlay() {
+    const topScores = await fetchTopScores();
+
+    // Create score list HTML
+    const scoreListHTML = topScores.map(entry => {
+        return `<div class="best-score-value" id="best-score">
+                <div class="best-score-value-inner-name">${entry && entry.name ? entry.name : 'Unknown'}: </div>
+                <div class="best-score-value-inner-score"> ${entry && entry.score ? entry.score.toString().padStart(5, '0') : '00000'} </div>  
+                </div>`;
+    }).join('');
+
     const overlay = document.createElement('div');
     overlay.id = 'paused-overlay';
     let timeToShow = Math.floor(remainingTime / 1000)
     if (isPaused) {
         overlay.innerText = 'Game Paused';
-        overlay.innerHTML = `<div id="retro-menu" class="menu">
+        overlay.innerHTML = `<div id="retro-menue" class="menu">
                                 <h1 class="menu-title">Pause Menu</h1> 
                                 <div class="menu-options"> 
                                     <div class="button-30" id="restart-button">Restart Game</div> 
@@ -378,25 +388,24 @@ function showPausedOverlay() {
                                 </div>
                              </div>`;
     } else if (!gameRunning && !gameOver) {
-
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
-                                <h1 class="menu-title">Shooting Game</h1> 
-                                <div class="menu-options"> 
-                                    <div class="button-30" id="start-button">Start Game</div> 
-                                    <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
-                                    <div class="button-30" id="fullscreen-button">Fullscreen</div> 
-                                    <div class="volume-control">
-                                        <i id="volume-icon" class="fas fa-volume-mute"></i>
-                                        <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider()}">
-                                    </div>
-                                </div> 
-                                <div class="score-display">
-                                <div class="score-label">BEST SCORE</div>
-                                <div class="score-value" id="score">012345</div>
-                                </div> 
-                             </div>`;
+        overlay.innerHTML = `<div id="retro-menue" class="menu"> 
+                            <h1 class="menu-title">Shooting Game</h1> 
+                            <div class="menu-options"> 
+                                <div class="button-30" id="start-button">Start Game</div> 
+                                <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
+                                <div class="button-30" id="fullscreen-button">Fullscreen</div> 
+                                <div class="volume-control">
+                                    <i id="volume-icon" class="fas fa-volume-mute"></i>
+                                    <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider()}">
+                                </div>
+                            </div> 
+                            <div class="best-score-display">
+                                <div class="best-score-label">TOP 7 SCORES</div>
+                                <div class="best-score-list" id="score-list">${scoreListHTML}</div>
+                            </div> 
+                         </div>`;
     } else if (!gameRunning && gameOver) {
-        overlay.innerHTML = `<div id="retro-menu" class="menu"> 
+        overlay.innerHTML = `<div id="retro-menue" class="menu"> 
                                 <h1 class="menu-title">Game Over</h1> 
                                 <h1 class="menu-title">You did ${score} points !</h1> 
                                 <ul class="menu-options"> 
@@ -417,21 +426,28 @@ function showPausedOverlay() {
 
     let startButton = document.getElementById('start-button');
     if (startButton) {
-        playSound(startClicSound)
-        startButton.addEventListener('click', startGame);
+        startButton.addEventListener('click', () =>{
+            playSound(startClickSound)
+            startGame()
+        });
     }
 
     const restartButton = document.getElementById('restart-button');
     if (restartButton) {
-        playSound(startClicSound)
-        restartButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click',() =>{
+            playSound(startClickSound)
+            startGame()
+        });
     }
 
     const back_to_start = document.getElementById('back_to_start-button');
     if (back_to_start) {
-        playSound(startClicSound)
-        back_to_start.addEventListener('click', returnToMenu);
+        back_to_start.addEventListener('click',() =>{
+            playSound(startClickSound)
+            returnToMenu()
+        });
     }
+
 
     const fullscreen = document.getElementById('fullscreen-button');
     if (fullscreen) {
@@ -568,10 +584,9 @@ function bossTime() {
             gameArea.removeChild(boss); // Remove the boss if still present
         }
 
-       saveScore(score); // Call the end of the game
+        saveScore(score); // Call the end of the game
     }, 5000); // Boss stays for 5 seconds
 }
-
 
 function saveScore(score) { // Assuming score is passed to the function
     const overlay = document.createElement('div');
@@ -603,7 +618,7 @@ function saveScore(score) { // Assuming score is passed to the function
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "/save-score", true);
                 xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                xhr.send(JSON.stringify({ name: name, score: score }));
+                xhr.send(JSON.stringify({name: name, score: score}));
 
                 hidePausedOverlay()
                 endGame(); // End the game after submitting
@@ -613,4 +628,19 @@ function saveScore(score) { // Assuming score is passed to the function
             }
         });
     });
+}
+
+async function fetchTopScores() {
+    try {
+        const response = await fetch('/get-save-score'); // Adjust the endpoint as necessary
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const scores = await response.json();
+        // Sort the scores by descending order and get the top 10
+        return scores.sort((a, b) => b.Score - a.Score).slice(0, 7);
+    } catch (error) {
+        console.error('Failed to fetch scores:', error);
+        return []; // Return an empty array in case of an error
+    }
 }
