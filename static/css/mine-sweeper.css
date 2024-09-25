@@ -16,6 +16,33 @@ p {
     font-size: 1.2em;
     margin-bottom: 20px;
 }
+#info #timer{
+    display: none;
+    justify-content: center;
+    gap: 2ch;
+    padding: 1rem 2rem;
+    border-radius: .3rem;
+    background-color: darkcyan;
+}
+#info #timer .hour,
+#info #timer .minute,
+#info #timer .second{
+    padding: .7rem;
+    border-radius: .3rem;
+    background-color: #fee6e3;
+    font-size: 4rem;
+    color: dodgerblue;
+}
+.game-ctn {
+    display: flex;
+    justify-content: center;
+}
+.game-ctn .army-img {
+    flex: 1;
+}
+.game-ctn .army-img img {
+    width: 70%;
+}
 #game-board {
     display: grid;
     margin: 0 auto;
@@ -145,6 +172,46 @@ p {
 .opponent .strength {
     color: midnightblue;
     font-size: 32px;
+}
+
+/* progress bar */
+.progress_bar_item {
+    width: 65%;
+    height: 3.2rem;
+    margin-bottom: 2rem;
+}
+.labels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.item_label,
+.item_value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+.item_value {
+    font-weight: 400;
+}
+.item_bar {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    border-radius: 4px;
+}
+.item_bar .progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    margin: 0;
+    background-color: #f50045;
+    border-radius: 4px;
+    transition: width 100ms ease;
 }
 
 /* completion percentage */

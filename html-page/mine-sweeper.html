@@ -12,25 +12,38 @@
 
 <div id="info">
   <div id="timer"></div>
-  <button id="restart-btn">Restart</button>
-</div>
-
-<div id="game-board">
-  <div id="start-btn">Start</div>
-  <!-- The game board will be generated here -->
+<!--  <button id="restart-btn">Restart</button>-->
 </div>
 
 <div class="recap-info">
   <div class="player">
-    <div id="cont" data-pct="100">
-      <svg id="svg" width="200" height="200" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <circle r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
-        <circle id="bar" r="90" cx="100" cy="100" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
-      </svg>
+    <div class="progress_bar_item" id="player-bar">
+      <div class="item_bar">
+        <div class="progress"></div>
+      </div>
+      <div class="labels">
+        <div class="item_label">You</div>
+        <div class="item_value"></div>
+      </div>
     </div>
   </div>
   <div class="opponent">
-    <div class="strength"></div>
+    <div class="progress_bar_item" id="opponent-bar">
+      <div class="item_bar">
+        <div class="progress"></div>
+      </div>
+      <div class="labels">
+        <div class="item_label">Enemy</div>
+        <div class="item_value"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="game-ctn">
+  <div id="game-board">
+    <div id="start-btn">Start</div>
+    <!-- The game board will be generated here -->
   </div>
 </div>
 

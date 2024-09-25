@@ -9,6 +9,8 @@ const mine = 'M';
 const tiles = ['clay.png', 'forest.png', 'grass.png', 'mountain.png', 'sand.png'];
 const boardElem = document.querySelector('#game-board');
 let revealedCount = 0;
+const playerBar = document.querySelector('#player-bar');
+const opponentBar = document.querySelector('#opponent-bar');
 let totalPlayerStrength = 1_000;
 let playerStrength = 1_000;
 let opponentStrength = 700;
@@ -112,8 +114,43 @@ function endGame() {
     console.log('Game Over');
 }
 
+function displayTimer() {
+    timer.style.display = 'flex';
+    const hourElem = document.createElement('div');
+    hourElem.classList.add('hour');
+    const minuteElem = document.createElement('div');
+    minuteElem.classList.add('minute');
+    const secondElem = document.createElement('div');
+    secondElem.classList.add('second');
+    if (time >= 3600) {
+        timer.appendChild(hourElem);
+    }
+    if (time >= 60) {
+        timer.appendChild(minuteElem);
+    }
+    timer.appendChild(secondElem);
+}
+
 function updateTimer() {
-    timer.innerText = `Time: ${time}s`;
+    // setting time values
+    let hours = Math.floor(time / 3600);
+    let minutes = Math.floor((time % 3600) / 60);
+    let seconds = (time % 3600) % 60;
+
+    // padding left with 0 if necessary
+    if (hours < 10) hours = `0${hours}`;
+    if (minutes < 10) minutes = `0${minutes}`;
+    if (seconds < 10) seconds = `0${seconds}`;
+
+    // getting DOM elements
+    const hourElem = timer.querySelector('.hour');
+    const minuteElem = timer.querySelector('.minute');
+    const secondElem = timer.querySelector('.second');
+
+    // updating values in the display
+    if (!!hourElem) hourElem.innerText = `${hours}`;
+    if (!!minuteElem) minuteElem.innerText = `${minutes}`;
+    if (!!secondElem) secondElem.innerText = `${seconds}`;
 }
 
 function startTimer() {
@@ -149,6 +186,20 @@ function revealBlankCell() {
 }
 
 function displayBlankBoard() {
+
+    const gameCtn = document.querySelector('.game-ctn');
+
+    const playerImg = document.createElement('div');
+    playerImg.classList.add('army-img');
+    const opponentImg = document.createElement('div');
+    opponentImg.classList.add('army-img');
+
+    playerImg.innerHTML = '<img src="/static/minesweeper/player-tank.png" alt="player army">';
+    opponentImg.innerHTML = '<img src="/static/minesweeper/enemy-tank.png" alt="enemy army">';
+
+    gameCtn.insertBefore(playerImg, gameCtn.firstChild);
+    gameCtn.appendChild(opponentImg);
+
     boardElem.innerHTML = '';
     boardElem.style.gridTemplateColumns = `repeat(${width}, ${cellWidth}px)`;
     boardElem.style.width = 'fit-content';
@@ -205,23 +256,43 @@ function clickEvents(cell) {
     });
 }
 
+// strength progress bar
+function updateProgressBar(value = {percentage: 0, units: 0}, item = playerBar) {
+
+    const speed = 35;
+    const progress = item.querySelector('.progress');
+    let i = parseInt(progress.style.width.replace('%', ''));
+
+    const next = i < value.percentage ? function () {
+            ++i;
+        } : i > value.percentage ? function () {
+            --i;
+        } : () => {};
+    const count = setInterval(function(){
+
+        if (i === value.percentage) {
+            clearInterval(count);
+            return;
+        }
+        progress.style.width = `${i}%`;
+        item.querySelector('.item_value').innerText = `${value.units} units`;
+        next();
+    }, speed);
+}
+
+function setBars() {
+    opponentBar.querySelector('.item_value').innerText = `${opponentStrength} units`;
+    opponentBar.querySelector('.progress').style.width = '100%';
+    playerBar.querySelector('.item_value').innerText = `0 units`;
+    playerBar.querySelector('.progress').style.width = '0%';
+}
+
 // completion percentage
 function updateCompletion(){
-    let val = 100 - Math.floor(100 * revealedCount / ((width * height) - mineNb));
-    const circle = document.querySelector('#svg #bar');
+    let val = Math.floor(100 * revealedCount / ((width * height) - mineNb));
+    playerStrength = Math.floor(totalPlayerStrength * (val / 100));
 
-    const r = parseInt(circle.getAttribute('r'));
-    const c = Math.PI*(r*2);
-
-    if (val < 0) { val = 0;}
-    if (val > 100) { val = 100;}
-
-    const pct = ((val)/100)*c;
-    playerStrength = totalPlayerStrength * (1 - (val / 100));
-
-    circle.style = `stroke-dashoffset: ${pct}`;
-
-    document.querySelector('#cont').setAttribute('data-pct', `${Math.floor(playerStrength)}`);
+    updateProgressBar({percentage: val, units: playerStrength})
 }
 
 function revealCell(cell) {
@@ -282,15 +353,15 @@ function revealAll() {
 function initPlayers() {
     totalPlayerStrength = playerStrength = 1_000;
     opponentStrength = 700;
-    const opponent = document.querySelector('.opponent .strength');
-    opponent.innerText = `${opponentStrength}`;
 }
 
 function play() {
     initBoard();
     initPlayers();
-    updateCompletion();
     recapInfo.style.display = 'flex';
+    setBars();
+    displayTimer();
+    updateTimer();
 
     // DEBUG
     printBoardDebug(board);
