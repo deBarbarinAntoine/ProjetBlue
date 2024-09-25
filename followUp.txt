@@ -39,7 +39,7 @@ Nouveaux types d'ennemis : En ajoutant des ennemis avec des comportements varié
 Environnement destructible : Cela permettrait de rendre le monde du jeu plus interactif, ce qui enrichirait l'immersion et créerait de nouvelles façons de gérer les menaces.
 
 c. Prototype et démonstration
-Lors de la démonstration, tu pourrais montrer comment ces fonctionnalités ajoutent de la profondeur sans altérer l’esprit du jeu original. Par exemple, activer le "bullet time" dans un moment critique pour montrer comment cela améliore la prise de décision du joueur.
+Lors de la démonstration, montrer comment ces fonctionnalités ajoutent de la profondeur sans altérer l’esprit du jeu original. Par exemple, activer le "bullet time" dans un moment critique pour montrer comment cela améliore la prise de décision du joueur.
 
 3. Implémentation et Développement
 a. Développement de la version améliorée
