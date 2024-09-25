@@ -20,6 +20,7 @@ p {
     display: grid;
     margin: 0 auto;
     border: 3px solid black;
+    user-select: none;
 }
 #start-btn {
     align-items: center;
@@ -74,19 +75,20 @@ p {
     }
 }
 .cell {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border: 1px solid black;
-    background-color: cadetblue;
+    background-color: #EAAF7B;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    cursor: grab;
+    font-size: 32px;
+    cursor: url("/static/minesweeper/pickaxe.png") 4 8, auto;
+    user-select: none;
 }
 .cell.revealed {
     background-color: lightsteelblue;
-    cursor: crosshair;
+    cursor: url("/static/minesweeper/pickaxe.png") 4 8, auto;
 }
 .cell.revealed[data-mine-nb="0"] {
     background-color: lightskyblue;
@@ -121,12 +123,62 @@ p {
 .cell.mine {
     background-color: red;
 }
-.cell.debug {
-    background-color: darkorchid !important;
-}
-.mine-image {
+.cell-image {
     object-fit: contain;
     object-position: center;
     width: 100%;
     height: 100%;
+}
+
+/* recap info */
+.recap-info {
+    display: none;
+    gap: 2rem;
+    padding: 2rem 0;
+}
+.player, .opponent {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.opponent .strength {
+    color: midnightblue;
+    font-size: 32px;
+}
+
+/* completion percentage */
+#svg circle {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+    stroke: #666;
+    stroke-width: 1em;
+}
+#svg #bar {
+    stroke: #FF9F1E;
+}
+#cont {
+    display: block;
+    height: 200px;
+    width: 200px;
+    margin: 2em auto;
+    box-shadow: 0 0 1em black;
+    border-radius: 100%;
+    position: relative;
+}
+#cont:after {
+    position: absolute;
+    display: block;
+    height: 160px;
+    width: 160px;
+    left: 50%;
+    top: 50%;
+    box-shadow: inset 0 0 1em black;
+    content: attr(data-pct)" units";
+    margin-top: -80px;
+    margin-left: -80px;
+    border-radius: 100%;
+    line-height: 160px;
+    font-size: 2em;
+    text-shadow: 0 0 0.5em black;
 }
