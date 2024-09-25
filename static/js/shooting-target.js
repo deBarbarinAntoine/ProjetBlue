@@ -358,7 +358,17 @@ function returnToMenu() {
 }
 
 // functions for showing/hiding a paused overlay
-function showPausedOverlay() {
+async function showPausedOverlay() {
+    const topScores = await fetchTopScores();
+
+    // Create score list HTML
+    const scoreListHTML = topScores.map(entry => {
+        return `<div class="best-score-value" id="best-score">
+                <div class="best-score-value-inner-name">${entry && entry.name ? entry.name : 'Unknown'}: </div>
+                <div class="best-score-value-inner-score"> ${entry && entry.score ? entry.score.toString().padStart(5, '0') : '00000'} </div>  
+                </div>`;
+    }).join('');
+
     const overlay = document.createElement('div');
     overlay.id = 'paused-overlay';
     let timeToShow = Math.floor(remainingTime / 1000)
@@ -378,23 +388,22 @@ function showPausedOverlay() {
                                 </div>
                              </div>`;
     } else if (!gameRunning && !gameOver) {
-
         overlay.innerHTML = `<div id="retro-menu" class="menu"> 
-                                <h1 class="menu-title">Shooting Game</h1> 
-                                <div class="menu-options"> 
-                                    <div class="button-30" id="start-button">Start Game</div> 
-                                    <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
-                                    <div class="button-30" id="fullscreen-button">Fullscreen</div> 
-                                    <div class="volume-control">
-                                        <i id="volume-icon" class="fas fa-volume-mute"></i>
-                                        <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider()}">
-                                    </div>
-                                </div> 
-                                <div class="score-display">
-                                <div class="score-label">BEST SCORE</div>
-                                <div class="score-value" id="score">012345</div>
-                                </div> 
-                             </div>`;
+                            <h1 class="menu-title">Shooting Game</h1> 
+                            <div class="menu-options"> 
+                                <div class="button-30" id="start-button">Start Game</div> 
+                                <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
+                                <div class="button-30" id="fullscreen-button">Fullscreen</div> 
+                                <div class="volume-control">
+                                    <i id="volume-icon" class="fas fa-volume-mute"></i>
+                                    <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider()}">
+                                </div>
+                            </div> 
+                            <div class="best-score-display">
+                                <div class="best-score-label">TOP 7 SCORES</div>
+                                <div class="best-score-list" id="score-list">${scoreListHTML}</div>
+                            </div> 
+                         </div>`;
     } else if (!gameRunning && gameOver) {
         overlay.innerHTML = `<div id="retro-menu" class="menu"> 
                                 <h1 class="menu-title">Game Over</h1> 
@@ -568,10 +577,9 @@ function bossTime() {
             gameArea.removeChild(boss); // Remove the boss if still present
         }
 
-       saveScore(score); // Call the end of the game
+        saveScore(score); // Call the end of the game
     }, 5000); // Boss stays for 5 seconds
 }
-
 
 function saveScore(score) { // Assuming score is passed to the function
     const overlay = document.createElement('div');
@@ -603,7 +611,7 @@ function saveScore(score) { // Assuming score is passed to the function
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", "/save-score", true);
                 xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                xhr.send(JSON.stringify({ name: name, score: score }));
+                xhr.send(JSON.stringify({name: name, score: score}));
 
                 hidePausedOverlay()
                 endGame(); // End the game after submitting
@@ -613,4 +621,19 @@ function saveScore(score) { // Assuming score is passed to the function
             }
         });
     });
+}
+
+async function fetchTopScores() {
+    try {
+        const response = await fetch('/get-save-score'); // Adjust the endpoint as necessary
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const scores = await response.json();
+        // Sort the scores by descending order and get the top 10
+        return scores.sort((a, b) => b.Score - a.Score).slice(0, 7);
+    } catch (error) {
+        console.error('Failed to fetch scores:', error);
+        return []; // Return an empty array in case of an error
+    }
 }
