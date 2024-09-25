@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -9,8 +10,91 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sort"
+	"sync"
 	"time"
 )
+
+// ScoreEntry Define a structure for the score entry
+type ScoreEntry struct {
+	Name  string `json:"name"`
+	Score int    `json:"score"`
+}
+
+var fileLock sync.Mutex // Protects file access to avoid race conditions
+
+func saveScoreHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the incoming JSON request
+	var newEntry ScoreEntry
+	err := json.NewDecoder(r.Body).Decode(&newEntry)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate the incoming score entry
+	if newEntry.Name == "" || newEntry.Score < 0 {
+		http.Error(w, "Invalid score data", http.StatusBadRequest)
+		return
+	}
+
+	// File path for storing the scores
+	filePath := "./static/shooting-scores.json"
+
+	// Lock to prevent concurrent access to the file
+	fileLock.Lock()
+	defer fileLock.Unlock()
+
+	// Read existing scores from file
+	file, err := os.ReadFile(filePath)
+	if err != nil && !os.IsNotExist(err) { // If file doesn't exist, that's fine
+		http.Error(w, "Error reading the scores file", http.StatusInternalServerError)
+		return
+	}
+
+	var scores []ScoreEntry
+	if len(file) > 0 { // Only unmarshal if the file has content
+		err = json.Unmarshal(file, &scores)
+		if err != nil {
+			http.Error(w, "Error parsing the scores file", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Append the new score to the list
+	scores = append(scores, newEntry)
+
+	// Sort scores by highest first
+	sort.Slice(scores, func(i, j int) bool {
+		return scores[i].Score > scores[j].Score
+	})
+
+	// Write the updated scores back to the JSON file
+	updatedScores, err := json.MarshalIndent(scores, "", "  ")
+	if err != nil {
+		http.Error(w, "Error saving the updated scores", http.StatusInternalServerError)
+		return
+	}
+
+	err = os.WriteFile(filePath, updatedScores, 0644)
+	if err != nil {
+		http.Error(w, "Error writing the scores to file", http.StatusInternalServerError)
+		return
+	}
+
+	// Return the updated list of scores as a JSON response
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(updatedScores)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
 
 // Serve the homepage
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -80,6 +164,9 @@ func main() {
 	mux.HandleFunc("/puzzle-game", puzzleGamePage)
 	mux.HandleFunc("/shooting-game", shootingGame)
 	mux.HandleFunc("/mine-sweeper", mineSweeper)
+
+	// New AJAX endpoint to save score
+	mux.HandleFunc("/save-score", saveScoreHandler)
 
 	// Serve a custom 404 page for any unknown routes
 	mux.HandleFunc("/404", notFoundHandler)

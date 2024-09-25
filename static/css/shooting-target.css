@@ -1,4 +1,4 @@
-*{
+* {
     margin: 0;
     padding: 0;
     font-family: 'Press Start 2P', cursive; /* Google font for retro feel */
@@ -10,11 +10,21 @@ body {
 }
 
 @keyframes blink {
-    0% { opacity: 1; }
-    25% { opacity: 0; }
-    50% { opacity: 1; }
-    75% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 #game-area {
@@ -36,9 +46,11 @@ body {
     width: 100%;
 }
 
-.background_image_animation {animation: blurEffect 4s infinite ease-in-out; /* Blurring animation */}
+.background_image_animation {
+    animation: blurEffect 4s infinite ease-in-out; /* Blurring animation */
+}
 
-.game-area-ctn{
+.game-area-ctn {
     width: 90vw;
     height: 80vh;
     overflow: hidden;
@@ -65,6 +77,13 @@ body {
 
 .friendly {
     background-image: url("/static/shooting_image/ally.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.boss {
+    background-image: url("/static/shooting_image/boss.gif");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -123,7 +142,7 @@ body {
     cursor: url('/static/shooting_image/default.png'), auto;
 }
 
-.menu-options{
+.menu-options {
     width: 80%;
     display: flex;
     flex-direction: column;
@@ -146,7 +165,7 @@ body {
     gap: 2ch;
 }
 
-.timeBarContainer  {
+.timeBarContainer {
     position: absolute; /* Position it absolutely within the game area container */
     bottom: 0; /* Distance from the bottom */
     left: 0; /* Distance from the left */
@@ -171,11 +190,11 @@ body {
     background-color: #FCFCFD;
     border-radius: 4px;
     border-width: 0;
-    box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
+    box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
     box-sizing: border-box;
     color: #36395A;
     display: inline-flex;
-    font-family: "JetBrains Mono",monospace;
+    font-family: "JetBrains Mono", monospace;
     height: 48px;
     justify-content: center;
     line-height: 1;
@@ -186,12 +205,12 @@ body {
     position: relative;
     text-align: left;
     text-decoration: none;
-    transition: box-shadow .15s,transform .15s;
+    transition: box-shadow .15s, transform .15s;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
     white-space: nowrap;
-    will-change: box-shadow,transform;
+    will-change: box-shadow, transform;
     font-size: 18px;
     width: 100%;
 }
@@ -210,15 +229,15 @@ body {
     transform: translateY(2px);
 }
 
-.menu-title{
+.menu-title {
     margin-bottom: 1rem;
 }
 
-h1{
+h1 {
     font-size: 2.5em;
 }
 
-.menu{
+.menu {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -269,7 +288,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin-right: 10px; /* Space between icon and slider */
 }
 
-.affichage-30{
+.affichage-30 {
     background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent background for readability */
     color: white; /* Score text color */
     padding: 5px; /* Some padding for aesthetics */
@@ -278,4 +297,37 @@ input[type="range"]::-webkit-slider-thumb:hover {
     align-items: center;
     justify-content: center;
     gap: 2ch;
+}
+
+/* Retro Score Display Styling */
+.score-display {
+    position: absolute;
+    top: 2vh;
+    left: 2vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    padding: 20px 40px;
+    border: 5px solid #999;
+    border-radius: 10px;
+    box-shadow: 0px 0px 30px 5px rgba(0, 255, 0, 0.8);
+}
+
+.score-label {
+    font-size: 1.2em;
+    color: #0f0; /* Neon green color */
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.score-value {
+    font-size: 2.5em;
+    color: #fff;
+    background-color: #222;
+    padding: 10px 20px;
+    border: 3px solid #0f0;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 2px rgba(0, 255, 0, 0.8);
 }
