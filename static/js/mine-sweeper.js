@@ -112,6 +112,23 @@ function endGame() {
         clearEventListeners(cell).addEventListener('contextmenu', (e) => e.preventDefault());
     }
     console.log('Game Over');
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+
+    let message = '';
+    if (playerStrength >= opponentStrength) {
+        message = 'you won!'
+        const percentageLoss = 100 - Math.floor(opponentStrength * 100 / totalPlayerStrength);
+        updateProgressBar({percentage: 0, units: 0}, opponentBar);
+        updateProgressBar({percentage: percentageLoss, units: (playerStrength - opponentStrength)});
+    } else {
+        message = 'you lost!'
+        updateProgressBar();
+        const percentageLoss = 100 - Math.floor(playerStrength * 100 / opponentStrength);
+        updateProgressBar({percentage: percentageLoss, units: (opponentStrength - playerStrength)}, opponentBar);
+    }
+    overlay.innerHTML = `<p>Game Over!</p><p>${message}</p>`;
+    boardElem.appendChild(overlay);
 }
 
 function displayTimer() {
@@ -170,6 +187,7 @@ function startTimer() {
 function addTileImg(cell) {
     const tile = tiles[randomIntFromInterval(0, tiles.length - 1)];
     cell.innerHTML = `<img class="cell-image" src="/static/minesweeper/${tile}" alt="tile image">`;
+    cell.dataset.tile = tile;
 }
 
 function revealBlankCell() {
@@ -242,7 +260,7 @@ function clickEvents(cell) {
         e.preventDefault();
 
         if (cell.classList.contains('flagged')) {
-            cell.innerHTML = '';
+            cell.innerHTML = `<img class="cell-image" src="/static/minesweeper/${cell.dataset.tile}" alt="tile image">`;
         } else {
             cell.innerHTML = '<img class="cell-image" src="/static/minesweeper/flag.png" alt="flag image">';
         }
@@ -315,6 +333,7 @@ function revealCell(cell) {
             cell.classList.add('mine');
             revealAll();
             isPaused = true;
+            endGame();
             return;
 
         default:
@@ -363,9 +382,6 @@ function play() {
     displayTimer();
     updateTimer();
 
-    // DEBUG
-    printBoardDebug(board);
-
     displayBlankBoard();
 
     // getting all cells
@@ -378,5 +394,5 @@ function play() {
     revealBlankCell();
 }
 
-const startBtn = document.querySelector('#start-btn');
+const startBtn = document.querySelector('#campaign-btn');
 startBtn.addEventListener('click', play);

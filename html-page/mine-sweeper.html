@@ -20,10 +20,10 @@
     <div class="progress_bar_item" id="player-bar">
       <div class="item_bar">
         <div class="progress"></div>
-      </div>
-      <div class="labels">
-        <div class="item_label">You</div>
-        <div class="item_value"></div>
+        <div class="labels">
+          <div class="item_label">You</div>
+          <div class="item_value"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -31,10 +31,10 @@
     <div class="progress_bar_item" id="opponent-bar">
       <div class="item_bar">
         <div class="progress"></div>
-      </div>
-      <div class="labels">
-        <div class="item_label">Enemy</div>
-        <div class="item_value"></div>
+        <div class="labels">
+          <div class="item_label">Enemy</div>
+          <div class="item_value"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -42,7 +42,10 @@
 
 <div class="game-ctn">
   <div id="game-board">
-    <div id="start-btn">Start</div>
+    <label for="name-input">Name:</label>
+    <input type="text" id="name-input" class="name-input" placeholder="Username...">
+    <div id="campaign-btn">Campaign Mode</div>
+    <div id="multiplayer-btn">Multiplayer Mode</div>
     <!-- The game board will be generated here -->
   </div>
 </div>
