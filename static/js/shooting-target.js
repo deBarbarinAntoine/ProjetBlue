@@ -6,7 +6,7 @@ let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
 let soundEnabled = true;
-const maxTime = 10000
+const maxTime = 1000
 let remainingTime;
 let endGameTimeout;
 let gameStartTime;
@@ -19,6 +19,7 @@ let timeBarAnimationFrame;
 let pauseTime = 0;
 let resumeTime = 0;
 let existingTargets = []; // Array to store the positions and sizes of existing targets
+let numberOfShownScores = 0;
 
 // Sound effects
 const hitSounds = new Audio('/static/sound_mp3/enemy_hurt3.mp3');
@@ -358,17 +359,7 @@ function returnToMenu() {
 }
 
 // functions for showing/hiding a paused overlay
-async function showPausedOverlay() {
-    const topScores = await fetchTopScores();
-
-    // Create score list HTML
-    const scoreListHTML = topScores.map(entry => {
-        return `<div class="best-score-value" id="best-score">
-                <div class="best-score-value-inner-name">${entry && entry.name ? entry.name : 'Unknown'}: </div>
-                <div class="best-score-value-inner-score"> ${entry && entry.score ? entry.score.toString().padStart(5, '0') : '00000'} </div>  
-                </div>`;
-    }).join('');
-
+function showPausedOverlay() {
     const overlay = document.createElement('div');
     overlay.id = 'paused-overlay';
     let timeToShow = Math.floor(remainingTime / 1000)
@@ -394,15 +385,12 @@ async function showPausedOverlay() {
                                 <div class="button-30" id="start-button">Start Game</div> 
                                 <div class="button-30" id="difficulty-button">Difficulty : ${difficulty}</div> 
                                 <div class="button-30" id="fullscreen-button">Fullscreen</div> 
+                                <div class="button-30" id="best-scores-button">Best Players</div> 
                                 <div class="volume-control">
                                     <i id="volume-icon" class="fas fa-volume-mute"></i>
                                     <input type="range" id="sound-slider" min="0" max="100" value="${setVolumeSlider()}">
                                 </div>
-                            </div> 
-                            <div class="best-score-display">
-                                <div class="best-score-label">TOP 7 SCORES</div>
-                                <div class="best-score-list" id="score-list">${scoreListHTML}</div>
-                            </div> 
+                            </div>
                          </div>`;
     } else if (!gameRunning && gameOver) {
         overlay.innerHTML = `<div id="retro-menue" class="menu"> 
@@ -426,7 +414,7 @@ async function showPausedOverlay() {
 
     let startButton = document.getElementById('start-button');
     if (startButton) {
-        startButton.addEventListener('click', () =>{
+        startButton.addEventListener('click', () => {
             playSound(startClickSound)
             startGame()
         });
@@ -434,7 +422,7 @@ async function showPausedOverlay() {
 
     const restartButton = document.getElementById('restart-button');
     if (restartButton) {
-        restartButton.addEventListener('click',() =>{
+        restartButton.addEventListener('click', () => {
             playSound(startClickSound)
             startGame()
         });
@@ -442,9 +430,18 @@ async function showPausedOverlay() {
 
     const back_to_start = document.getElementById('back_to_start-button');
     if (back_to_start) {
-        back_to_start.addEventListener('click',() =>{
+        back_to_start.addEventListener('click', () => {
             playSound(startClickSound)
             returnToMenu()
+        });
+    }
+
+    const show_best_players = document.getElementById('best-scores-button');
+    if (show_best_players) {
+        show_best_players.addEventListener('click', () => {
+            playSound(startClickSound)
+            hidePausedOverlay()
+            showScore()
         });
     }
 
@@ -630,6 +627,49 @@ function saveScore(score) { // Assuming score is passed to the function
     });
 }
 
+async function showScore() {
+    setNumberOfShownScores()
+    const topScores = await fetchTopScores();
+    // Create score list HTML
+    const scoreListHTML = topScores.map(entry => {
+        return `<div class="best-score-value" id="best-score">
+                <div class="best-score-value-inner-name">${entry && entry.name ? entry.name : 'Unknown'}: </div>
+                <div class="best-score-value-inner-score"> ${entry && entry.score ? entry.score.toString().padStart(5, '0') : '00000'} </div>  
+                </div>`;
+    }).join('');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'best-score-overlay';
+    overlay.innerHTML = `<div id="retro-menu" class="menu">
+                             <div class="best-score-display">
+                                <div class="best-score-label">TOP ${numberOfShownScores} SCORES</div>
+                                <div class="best-score-list" id="score-list">${scoreListHTML}</div>
+                            </div> 
+                            <ul class="menu-options">
+                                    <li class="button-30" id="back_to_start-button">Back to Menu</li> 
+                            </ul>
+                         </div>`;
+    document.getElementById('game-area').appendChild(overlay); // Append overlay to game-area
+    overlay.style.display = 'flex'; // Show the overlay
+
+    const back_to_start = document.getElementById('back_to_start-button');
+    if (back_to_start) {
+        back_to_start.addEventListener('click', () => {
+            playSound(startClickSound)
+            const overlay = document.getElementById('best-score-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+           const menu = document.getElementById('paused-overlay');
+            if (menu){
+                menu.style.display = 'flex'
+            }else{
+                returnToMenu()
+            }
+        });
+    }
+}
+
 async function fetchTopScores() {
     try {
         const response = await fetch('/get-save-score'); // Adjust the endpoint as necessary
@@ -638,9 +678,15 @@ async function fetchTopScores() {
         }
         const scores = await response.json();
         // Sort the scores by descending order and get the top 10
-        return scores.sort((a, b) => b.Score - a.Score).slice(0, 7);
+        return scores.sort((a, b) => b.Score - a.Score).slice(0, numberOfShownScores);
     } catch (error) {
         console.error('Failed to fetch scores:', error);
         return []; // Return an empty array in case of an error
     }
+}
+
+function  setNumberOfShownScores(){
+    const game_area = document.getElementById('game-area');
+    const game_area_size =  game_area.clientHeight
+    numberOfShownScores = Math.trunc((game_area_size / 70) - 2)
 }

@@ -161,7 +161,7 @@ body {
     right: 0; /* Distance from the right */
     background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent background for readability */
     color: white; /* Score text color */
-    padding: 5px; /* Some padding for aesthetics */
+    padding: 0.4rem 0.8rem; /* Some padding for aesthetics */
     border-radius: 5px; /* Rounded corners */
     z-index: 10; /* Ensure it's on top of other elements */
     display: flex;
@@ -257,7 +257,16 @@ input[type="range"] {
 }
 
 /* Slider track */
-input[type="range"]::-webkit-slider-runnable-track ,input[type="range"]::-moz-range-track {
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 1.5vh; /* Height of the track */
+    background: #666; /* Dark gray for the track */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); /* Inner shadow for depth */
+    cursor: url('/static/shooting_image/default.png'), auto;
+}
+
+input[type="range"]::-moz-range-track {
     width: 100%;
     height: 1.5vh; /* Height of the track */
     background: #666; /* Dark gray for the track */
@@ -267,7 +276,19 @@ input[type="range"]::-webkit-slider-runnable-track ,input[type="range"]::-moz-ra
 }
 
 /* Slider thumb */
-input[type="range"]::-webkit-slider-thumb,input[type="range"]::-moz-range-thumb  {
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none; /* Remove default styling */
+    width: 1.5vh; /* Width of the thumb */
+    height: 1.5vh; /* Height of the thumb */
+    background: #f00; /* Bright red for the thumb */
+    border: 2px solid #fff; /* White border for the thumb */
+    border-radius: 50%; /* Circular thumb */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+    cursor: url('/static/shooting_image/default.png'), auto;
+}
+
+input[type="range"]::-moz-range-thumb  {
     -webkit-appearance: none; /* Remove default styling */
     appearance: none; /* Remove default styling */
     width: 1.5vh; /* Width of the thumb */
@@ -280,11 +301,15 @@ input[type="range"]::-webkit-slider-thumb,input[type="range"]::-moz-range-thumb 
 }
 
 /* Slider hover effect */
-input[type="range"]::-webkit-slider-thumb:hover ,input[type="range"]::-moz-range-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover {
     background: #ff3300; /* Slightly brighter red on hover */
     cursor: url('/static/shooting_image/default.png'), auto;
 }
 
+input[type="range"]::-moz-range-thumb:hover {
+     background: #ff3300; /* Slightly brighter red on hover */
+     cursor: url('/static/shooting_image/default.png'), auto;
+ }
 
 .volume-control {
     display: flex; /* Use flexbox for alignment */
@@ -310,11 +335,24 @@ input[type="range"]::-webkit-slider-thumb:hover ,input[type="range"]::-moz-range
     gap: 2ch;
 }
 
+#best-score-overlay {
+    position: absolute; /* Position it absolutely within the game area */
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    color: white; /* Text color */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    z-index: 2; /* Ensure it's above the game content */
+    display: none; /* Initially hide the overlay */
+    cursor: url('/static/shooting_image/default.png'), auto;
+}
+
+
 /* Retro Score Display Styling */
 .best-score-display {
-    position: absolute;
-    top: 4vh;
-    left: 2vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -334,7 +372,7 @@ input[type="range"]::-webkit-slider-thumb:hover ,input[type="range"]::-moz-range
 }
 
 .best-score-value {
-    font-size: 2.5em;
+    font-size: 1.7em;
     color: #fff;
     background-color: #222;
     padding: 10px 20px;
@@ -343,12 +381,11 @@ input[type="range"]::-webkit-slider-thumb:hover ,input[type="range"]::-moz-range
     box-shadow: 0px 0px 10px 2px rgba(0, 255, 0, 0.8);
     margin-bottom: 0.5rem;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
 }
 
 .best-score-value-inner-name, .best-score-value-inner-score{
-width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -359,7 +396,7 @@ width: 50%;
     background-color: #222;
     padding: 20px;
     border: 4px solid #00ff00; /* Bright green border */
-    width: 300px;
+    width: 50%;
     text-align: center;
     color: #fff;
     box-shadow: 0px 0px 20px 0px rgba(0, 255, 0, 0.7);
