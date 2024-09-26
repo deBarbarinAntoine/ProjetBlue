@@ -253,7 +253,7 @@ input[type="range"] {
 }
 
 /* Slider track */
-input[type="range"]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track ,input[type="range"]::-moz-range-track {
     width: 100%;
     height: 1.5vh; /* Height of the track */
     background: #666; /* Dark gray for the track */
@@ -263,7 +263,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 
 /* Slider thumb */
-input[type="range"]::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb,input[type="range"]::-moz-range-thumb  {
     -webkit-appearance: none; /* Remove default styling */
     appearance: none; /* Remove default styling */
     width: 1.5vh; /* Width of the thumb */
@@ -276,10 +276,12 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* Slider hover effect */
-input[type="range"]::-webkit-slider-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover ,input[type="range"]::-moz-range-thumb:hover {
     background: #ff3300; /* Slightly brighter red on hover */
     cursor: url('/static/shooting_image/default.png'), auto;
 }
+
+
 
 .volume-control {
     display: flex; /* Use flexbox for alignment */
