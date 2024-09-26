@@ -14,10 +14,6 @@ let totalPlayerStrength = 1_000;
 let playerStrength = 0;
 let totalOpponentStrength = 700;
 let opponentStrength = 700;
-if (isMultiplayer) {
-    totalOpponentStrength = 1_000;
-    opponentStrength = 0;
-}
 const recapInfo = document.querySelector('.recap-info');
 let maxTime = 90;
 let time = maxTime;
@@ -117,7 +113,6 @@ function printBoardDebug(board) {
 }
 
 function clearEventListeners(elem) {
-    console.log(`clear events for cell ${elem.dataset.id}`);
     // cloning the cell to remove the eventListeners
     const elemClone = elem.cloneNode(true);
     elem.parentNode.replaceChild(elemClone, elem);
@@ -347,7 +342,12 @@ function updateCompletion() {
     playerStrength = Math.floor(totalPlayerStrength * (val / 100));
     if (isMultiplayer) {
         // Function to send WebSocket updates
-        sendUpdate('score-update', {playerName, val})
+        sendUpdate('score-update', {
+            data: {
+                name: playerName,
+                percentage: val
+            }
+        })
     }
 
     updateProgressBar({percentage: val, units: playerStrength})
@@ -355,8 +355,8 @@ function updateCompletion() {
 
 // multiplayer opponent percentage
 function multiplayerUpdateCompletion(opponentPercentage) {
-    opponentStrength = Math.floor(totalOpponentStrength * (opponentPercentage / 100));
-    updateProgressBar({percentage: opponentPercentage, units: opponentStrength});
+    opponentStrength = Math.floor(totalOpponentStrength * (parseInt(opponentPercentage) / 100));
+    updateProgressBar({percentage: opponentPercentage, units: opponentStrength}, opponentBar);
 }
 
 
@@ -424,6 +424,10 @@ function revealAll() {
 }
 
 function play() {
+    if (isMultiplayer) {
+        totalOpponentStrength = 1_000;
+        opponentStrength = 0;
+    }
     ++roundNb;
     initBoard();
     recapInfo.style.display = 'flex';

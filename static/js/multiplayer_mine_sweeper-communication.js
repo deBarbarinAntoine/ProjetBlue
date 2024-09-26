@@ -40,22 +40,27 @@ function startMatchingMultiplayer(playerName) {
 
 // On receiving a message from the server
     socket.onmessage = function (event) {
-        console.log('Message from server:', event.data);
-        const data = JSON.parse(event.data);
+       // console.log('Message from server:', event.data);
+        let data;
+        try {
+            data = JSON.parse(event.data);
+        } catch (error) {
+            // Do nothing if the data is not valid JSON
+            return; // Exit the function
+        }
 
         // Handle updates from opponent's score or progress
         if (data.type === 'score-update') {
-            const { player, score } = data;
+            const { name, percentage } = data.data;
             // Update the UI to show the opponent's score
-            if (player !== playerName) { // Assuming playerName is the current player's name
-                opponentStrength = score;
-                updateProgressBar({ percentage: (opponentStrength / totalPlayerStrength) * 100, units: opponentStrength }, opponentBar);
+            if (name !== playerName) {// Assuming playerName is the current player's name
+                multiplayerUpdateCompletion(percentage);
             }
         }
 
-        if (data.type === 'start-game'){
-            isMultiplayer = true
-            play()
+        if (data.type === 'start-game') {
+            isMultiplayer = true;
+            play();
         }
     };
 

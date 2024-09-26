@@ -1,6 +1,7 @@
 package mineSweeperMultiplayer
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"math/rand"
@@ -70,7 +71,6 @@ func JoinWaitingRoom(w http.ResponseWriter, r *http.Request) {
 
 func matchPlayers() {
 	if len(waitingRoom) >= 2 {
-		fmt.Println("test")
 		// Get the first two players from the queue
 		player1 := <-waitingRoom
 		player2 := <-waitingRoom
@@ -189,7 +189,7 @@ func startGame(room *Room) {
 
 func monitorPlayerConnection(player *Player, room *Room) {
 	for {
-		_, _, err := player.Conn.ReadMessage()
+		_, msg, err := player.Conn.ReadMessage()
 		if err != nil {
 			// Player disconnected
 			fmt.Printf("Player %s disconnected from room %s\n", player.Name, room.ID)
@@ -218,6 +218,38 @@ func monitorPlayerConnection(player *Player, room *Room) {
 			closeRoom(room)
 			return
 		}
+
+		var messageData struct {
+			Type string `json:"type"`
+			Data struct {
+				Name       string `json:"name"`
+				Percentage int    `json:"percentage"`
+			} `json:"data"`
+			// Add other fields that you expect in the payload
+		}
+
+		err = json.Unmarshal(msg, &messageData)
+		if err != nil {
+			fmt.Println("Error parsing message:", err)
+			continue
+		}
+		// Now you can handle different types of messages based on messageData.Type
+		if messageData.Type == "score-update" {
+			if messageData.Data.Name == room.Player1.Name {
+				err := room.Player2.Conn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					fmt.Println("Error notifying player 2:", err)
+					return
+				}
+			} else if messageData.Data.Name == room.Player2.Name {
+				err := room.Player1.Conn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					fmt.Println("Error notifying player 1:", err)
+					return
+				}
+			}
+			// Handle this specific type of message
+		}
 	}
 }
 
@@ -235,22 +267,3 @@ func CleanupExpiredRooms() {
 		}
 	}
 }
-
-//func updatePlayerScore(room *Room, player *Player, score int) {
-//	// Determine the other player
-//	otherPlayer := room.Player1
-//	if player == room.Player1 {
-//		otherPlayer = room.Player2
-//	}
-//
-//	// Send score updates to both players
-//	scoreUpdate := map[string]interface{}{
-//		"type":   "score-update",
-//		"player": player.Name,
-//		"score":  score,
-//	}
-//
-//	// Notify both players
-//	_ = player.Conn.WriteJSON(scoreUpdate)
-//	_ = otherPlayer.Conn.WriteJSON(scoreUpdate)
-//}
