@@ -334,8 +334,9 @@ function updateProgressBar(value = {percentage: 0, units: 0}, item = playerBar) 
 }
 
 function setBars() {
+    const opponentPercentage = Math.floor(opponentStrength * 100 / totalOpponentStrength);
     opponentBar.querySelector('.item_value').innerText = `${opponentStrength} units`;
-    opponentBar.querySelector('.progress').style.width = '100%';
+    opponentBar.querySelector('.progress').style.width = `${opponentPercentage}%`;
     playerBar.querySelector('.item_value').innerText = `0 units`;
     playerBar.querySelector('.progress').style.width = '0%';
 }
@@ -346,10 +347,16 @@ function updateCompletion() {
     playerStrength = Math.floor(totalPlayerStrength * (val / 100));
     if (isMultiplayer) {
         // Function to send WebSocket updates
-        sendUpdate('score-update', {playerName, playerStrength})
+        sendUpdate('score-update', {playerName, val})
     }
 
     updateProgressBar({percentage: val, units: playerStrength})
+}
+
+// multiplayer opponent percentage
+function multiplayerUpdateCompletion(opponentPercentage) {
+    opponentStrength = Math.floor(totalOpponentStrength * (opponentPercentage / 100));
+    updateProgressBar({percentage: opponentPercentage, units: opponentStrength});
 }
 
 
