@@ -11,9 +11,13 @@ let revealedCount = 0;
 const playerBar = document.querySelector('#player-bar');
 const opponentBar = document.querySelector('#opponent-bar');
 let totalPlayerStrength = 1_000;
-let playerStrength = 1_000;
+let playerStrength = 0;
 let totalOpponentStrength = 700;
 let opponentStrength = 700;
+if (isMultiplayer) {
+    totalOpponentStrength = 1_000;
+    opponentStrength = 0;
+}
 const recapInfo = document.querySelector('.recap-info');
 let maxTime = 90;
 let time = maxTime;
@@ -21,7 +25,7 @@ const timer = document.querySelector('#timer');
 let isPaused = true;
 let isFinished = false;
 let roundNb = 0;
-let isMultiplayer= false
+let isMultiplayer = false
 
 function nextLevel() {
     width += 2;
@@ -117,7 +121,7 @@ function clearEventListeners(elem) {
     // cloning the cell to remove the eventListeners
     const elemClone = elem.cloneNode(true);
     elem.parentNode.replaceChild(elemClone, elem);
-    return  elemClone;
+    return elemClone;
 }
 
 function endGame() {
@@ -146,7 +150,7 @@ function endGame() {
     overlay.innerHTML = `<p>Game Over!</p><p>${message}</p>`;
     boardElem.appendChild(overlay);
     if (hasNext) setTimeout(() => nextLevel(), 4000);
-    isMultiplayer=false
+    isMultiplayer = false
 }
 
 function displayTimer() {
@@ -194,12 +198,12 @@ function startTimer() {
     isPaused = false;
     isFinished = false;
 
-    const interval = setInterval(function() {
+    const interval = setInterval(function () {
         if (isFinished) {
             clearInterval(interval);
             return;
         }
-        if(!isPaused) {
+        if (!isPaused) {
             --time;
             updateTimer();
         }
@@ -312,11 +316,12 @@ function updateProgressBar(value = {percentage: 0, units: 0}, item = playerBar) 
     let i = parseInt(progress.style.width.replace('%', ''));
 
     const next = i < value.percentage ? function () {
-            ++i;
-        } : i > value.percentage ? function () {
-            --i;
-        } : () => {};
-    const count = setInterval(function(){
+        ++i;
+    } : i > value.percentage ? function () {
+        --i;
+    } : () => {
+    };
+    const count = setInterval(function () {
 
         if (i === value.percentage) {
             clearInterval(count);
@@ -336,7 +341,7 @@ function setBars() {
 }
 
 // completion percentage
-function updateCompletion(){
+function updateCompletion() {
     let val = Math.floor(100 * revealedCount / ((width * height) - mineNb));
     playerStrength = Math.floor(totalPlayerStrength * (val / 100));
     if (isMultiplayer) {
@@ -355,7 +360,14 @@ function revealCell(cell) {
     const value = board[cell.dataset.id];
     switch (value) {
 
-        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
             cell.innerHTML = '';
             cell.innerText = value;
             cell.dataset.mineNb = `${value}`;
