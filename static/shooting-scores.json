@@ -1,9 +1,5 @@
 [
   {
-    "name": "Thorgan",
-    "score": 250
-  },
-  {
     "name": "Nicolas",
     "score": 99999
   },
@@ -24,6 +20,10 @@
     "score": 369
   },
   {
+    "name": "Thorgan",
+    "score": 250
+  },
+  {
     "name": "Nicolas",
     "score": 215
   },
@@ -33,6 +33,10 @@
   },
   {
     "name": "Nini",
+    "score": 50
+  },
+  {
+    "name": "trop fort",
     "score": 50
   },
   {
