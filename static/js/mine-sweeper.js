@@ -3,7 +3,6 @@ let board = [];
 let width = 14;
 let height = 14;
 const cellWidth = 48;
-let boardLength = width * height;
 let mineNb = 30;
 const mine = 'M';
 const tiles = ['clay.png', 'forest.png', 'grass.png', 'mountain.png', 'sand.png'];
@@ -13,12 +12,25 @@ const playerBar = document.querySelector('#player-bar');
 const opponentBar = document.querySelector('#opponent-bar');
 let totalPlayerStrength = 1_000;
 let playerStrength = 1_000;
+let totalOpponentStrength = 700;
 let opponentStrength = 700;
 const recapInfo = document.querySelector('.recap-info');
-const maxTime = Math.floor(boardLength / 2);
+let maxTime = 90;
 let time = maxTime;
 const timer = document.querySelector('#timer');
 let isPaused = true;
+let isFinished = false;
+let roundNb = 0;
+
+function nextLevel() {
+    width += 2;
+    height += 2;
+    mineNb = Math.floor(width * height * .17);
+    totalOpponentStrength += 250;
+    opponentStrength = totalOpponentStrength;
+    totalPlayerStrength += 200 + playerStrength;
+    play();
+}
 
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -26,8 +38,7 @@ function randomIntFromInterval(min, max) { // min and max included
 
 function getNeighborIndices(index) {
 
-    index = Number(index);
-
+    index = parseInt(index);
     const neighbors = [];
 
     // Get row and column indices
@@ -74,6 +85,7 @@ function calcMine(index) {
 }
 
 function initBoard() {
+    const boardLength = width * height;
     board = new Array(boardLength);
     for (let i = 0; i < boardLength; i++) {
         board[i] = 0;
@@ -88,6 +100,7 @@ function initBoard() {
         --i;
     }
     revealedCount = 0;
+    time = maxTime = Math.floor(boardLength / 2);
 }
 
 function printBoardDebug(board) {
@@ -116,23 +129,27 @@ function endGame() {
     overlay.classList.add('overlay');
 
     let message = '';
+    let hasNext = false;
     if (playerStrength >= opponentStrength) {
-        message = 'you won!'
+        if (roundNb < 5) hasNext = true;
+        message = hasNext ? `you won!` : `you won with ${totalPlayerStrength} units max!`;
         const percentageLoss = 100 - Math.floor(opponentStrength * 100 / totalPlayerStrength);
         updateProgressBar({percentage: 0, units: 0}, opponentBar);
         updateProgressBar({percentage: percentageLoss, units: (playerStrength - opponentStrength)});
     } else {
-        message = 'you lost!'
+        message = `you lost with ${totalPlayerStrength} units max!`;
         updateProgressBar();
         const percentageLoss = 100 - Math.floor(playerStrength * 100 / opponentStrength);
         updateProgressBar({percentage: percentageLoss, units: (opponentStrength - playerStrength)}, opponentBar);
     }
     overlay.innerHTML = `<p>Game Over!</p><p>${message}</p>`;
     boardElem.appendChild(overlay);
+    if (hasNext) setTimeout(() => nextLevel(), 4000);
 }
 
 function displayTimer() {
     timer.style.display = 'flex';
+    timer.innerHTML = '';
     const hourElem = document.createElement('div');
     hourElem.classList.add('hour');
     const minuteElem = document.createElement('div');
@@ -171,8 +188,15 @@ function updateTimer() {
 }
 
 function startTimer() {
+
     isPaused = false;
+    isFinished = false;
+
     const interval = setInterval(function() {
+        if (isFinished) {
+            clearInterval(interval);
+            return;
+        }
         if(!isPaused) {
             --time;
             updateTimer();
@@ -207,22 +231,26 @@ function displayBlankBoard() {
 
     const gameCtn = document.querySelector('.game-ctn');
 
-    const playerImg = document.createElement('div');
-    playerImg.classList.add('army-img');
-    const opponentImg = document.createElement('div');
-    opponentImg.classList.add('army-img');
+    const previousPlayerImgs = document.querySelectorAll('.army-img');
 
-    playerImg.innerHTML = '<img src="/static/minesweeper/player-tank.png" alt="player army">';
-    opponentImg.innerHTML = '<img src="/static/minesweeper/enemy-tank.png" alt="enemy army">';
+    if (previousPlayerImgs.length === 0) {
+        const playerImg = document.createElement('div');
+        playerImg.classList.add('army-img');
+        const opponentImg = document.createElement('div');
+        opponentImg.classList.add('army-img');
 
-    gameCtn.insertBefore(playerImg, gameCtn.firstChild);
-    gameCtn.appendChild(opponentImg);
+        playerImg.innerHTML = '<img src="/static/minesweeper/player-tank.png" alt="player army">';
+        opponentImg.innerHTML = '<img src="/static/minesweeper/enemy-tank.png" alt="enemy army">';
+
+        gameCtn.insertBefore(playerImg, gameCtn.firstChild);
+        gameCtn.appendChild(opponentImg);
+    }
 
     boardElem.innerHTML = '';
     boardElem.style.gridTemplateColumns = `repeat(${width}, ${cellWidth}px)`;
     boardElem.style.width = 'fit-content';
     boardElem.style.height = 'fit-content';
-    for (let i = 0; i < boardLength; i++) {
+    for (let i = 0; i < board.length; i++) {
         const cellElem = document.createElement('div');
         cellElem.classList.add('cell');
         addTileImg(cellElem);
@@ -332,7 +360,7 @@ function revealCell(cell) {
             cell.innerHTML = '<img class="cell-image" src="/static/minesweeper/mine.svg" alt="mine image">';
             cell.classList.add('mine');
             revealAll();
-            isPaused = true;
+            isFinished = true;
             endGame();
             return;
 
@@ -354,7 +382,7 @@ function revealCell(cell) {
 }
 
 function revealAll() {
-    for (let i = 0; i < boardLength; i++) {
+    for (let i = 0; i < board.length; i++) {
         if (board[i] === mine) {
             let cell = document.querySelector(`.cell[data-id='${i}']`);
             cell = clearEventListeners(cell);
@@ -369,14 +397,9 @@ function revealAll() {
     }
 }
 
-function initPlayers() {
-    totalPlayerStrength = playerStrength = 1_000;
-    opponentStrength = 700;
-}
-
 function play() {
+    ++roundNb;
     initBoard();
-    initPlayers();
     recapInfo.style.display = 'flex';
     setBars();
     displayTimer();
