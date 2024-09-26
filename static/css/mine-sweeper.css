@@ -1,3 +1,9 @@
+@font-face {
+    src: url('/static/minesweeper/WARGAMES.ttf') format('truetype');
+    font-family: Wargames;
+    font-style: normal;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -5,9 +11,15 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Fira Code", sans-serif;
     text-align: center;
+    /*background-image: url("/static/minesweeper/background.png");*/
+    /*background-size: cover;*/
+    /*background-position: center;*/
+    /*background-repeat: no-repeat;*/
+    /*backdrop-filter: brightness(1.4) blur(2px) grayscale(.6);*/
     background-color: #f7f7f7;
+    min-height: 100dvh;
 }
 h1 {
     font-size: 2.5em;
@@ -17,6 +29,10 @@ p {
     font-size: 1.2em;
     margin-bottom: 20px;
 }
+#info {
+    display: flex;
+    justify-content: center;
+}
 #info #timer{
     display: none;
     justify-content: center;
@@ -25,6 +41,7 @@ p {
     border-radius: .3rem;
     background-color: darkcyan;
     user-select: none;
+    width: fit-content;
 }
 #info #timer .hour,
 #info #timer .minute,
@@ -38,6 +55,7 @@ p {
 .game-ctn {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 .game-ctn .army-img {
     flex: 1;
@@ -45,7 +63,24 @@ p {
 .game-ctn .army-img img {
     width: 70%;
 }
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    background-color: #777777AA;
+    backdrop-filter: blur(8px);
+    z-index: 5;
+
+    font-size: 1.5rem;
+}
 #game-board {
+    position: relative;
     display: grid;
     margin: 0 auto;
     border: 3px solid black;
@@ -179,30 +214,35 @@ p {
 /* progress bar */
 .progress_bar_item {
     width: 65%;
-    height: 3.2rem;
+    height: 4rem;
     margin-bottom: 2rem;
 }
 .labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
 }
 .item_label,
 .item_value {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-.item_value {
-    font-weight: 400;
+    font-family: Wargames, sans-serif;
+    font-size: 2.5rem;
+    height: 2.5rem;
+    font-weight: 800;
+    color: #D3D5D7;
 }
 .item_bar {
     position: relative;
     height: 100%;
     width: 100%;
     background-color: #000;
-    border-radius: 4px;
+    border-radius: 7px;
 }
 .item_bar .progress {
     position: absolute;
@@ -212,7 +252,7 @@ p {
     width: 0;
     margin: 0;
     background-color: #f50045;
-    border-radius: 4px;
+    border-radius: 7px;
     transition: width 100ms ease;
 }
 
