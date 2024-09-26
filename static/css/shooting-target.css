@@ -1,10 +1,16 @@
+@font-face {
+    src: url('/static/shooting_image/november.ttf') format('truetype');
+    font-family: November;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: November, sans-serif;
     text-align: center;
 }
 
