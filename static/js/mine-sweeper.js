@@ -21,7 +21,9 @@ const timer = document.querySelector('#timer');
 let isPaused = true;
 let isFinished = false;
 let roundNb = 0;
-let isMultiplayer = false
+let isMultiplayer = false;
+let isPlayer2Alive = true;
+let isAlive = true;
 
 function nextLevel() {
     width += 2;
@@ -104,12 +106,14 @@ function initBoard() {
     time = maxTime = Math.floor(boardLength / 2);
 }
 
-function printBoardDebug(board) {
+function printBoardDebug() {
     for (let i = 0; i < board.length; i += width) {
         const row = board.slice(i, i + width);
-        const concatenatedRow = row.join(' '); // Join elements with a space
+        const concatenatedRow = row.join(' | ');
+        console.log('-'.repeat(width * 4));
         console.log(concatenatedRow);
     }
+    console.log('-'.repeat(width * 4));
 }
 
 function clearEventListeners(elem) {
@@ -124,25 +128,37 @@ function endGame() {
         const cell = document.querySelector(`.cell[data-id='${i}']`);
         clearEventListeners(cell).addEventListener('contextmenu', (e) => e.preventDefault());
     }
-    console.log('Game Over');
+
     const overlay = document.createElement('div');
     overlay.classList.add('overlay');
 
     let message = '';
+    let title = '';
     let hasNext = false;
+    let messageClass = '';
     if (playerStrength >= opponentStrength) {
-        if (roundNb < 5 && !isMultiplayer) hasNext = true;
-        message = hasNext ? `you won!` : `you won with ${totalPlayerStrength} units max!`;
-        const percentageLoss = 100 - Math.floor(opponentStrength * 100 / totalPlayerStrength);
+        if (isMultiplayer && playerStrength === opponentStrength) {
+            title = 'Game Over!';
+            message = `you tied!`;
+            messageClass = 'tied';
+        } else {
+            title = 'Congratulations!';
+            hasNext = roundNb < 5 && !isMultiplayer;
+            message = hasNext || isMultiplayer ? `you won!` : `you won with ${totalPlayerStrength} units max!`;
+            messageClass = 'won';
+        }
+        const percentageLeft = Math.floor((playerStrength - opponentStrength) * 100 / totalPlayerStrength);
         updateProgressBar({percentage: 0, units: 0}, opponentBar);
-        updateProgressBar({percentage: percentageLoss, units: (playerStrength - opponentStrength)});
+        updateProgressBar({percentage: percentageLeft, units: (playerStrength - opponentStrength)});
     } else {
-        message = `you lost with ${totalPlayerStrength} units max!`;
+        title = 'Game Over!';
+        messageClass = 'lost';
+        message = isMultiplayer ? 'you lost!' : `you lost with ${totalPlayerStrength} units max!`;
         updateProgressBar();
-        const percentageLoss = 100 - Math.floor(playerStrength * 100 / opponentStrength);
-        updateProgressBar({percentage: percentageLoss, units: (opponentStrength - playerStrength)}, opponentBar);
+        const percentageLeft = Math.floor((opponentStrength - playerStrength) * 100 / totalOpponentStrength);
+        updateProgressBar({percentage: percentageLeft, units: (opponentStrength - playerStrength)}, opponentBar);
     }
-    overlay.innerHTML = `<p>Game Over!</p><p>${message}</p>`;
+    overlay.innerHTML = `<div class="outcome-ctn"><div class="title ${messageClass}">${title}</div><div class="message ${messageClass}">${message}</div></div>`;
     boardElem.appendChild(overlay);
     if (hasNext) setTimeout(() => nextLevel(), 4000);
     isMultiplayer = false
@@ -329,6 +345,7 @@ function updateProgressBar(value = {percentage: 0, units: 0}, item = playerBar) 
 }
 
 function setBars() {
+    isAlive = isPlayer2Alive = true;
     const opponentPercentage = Math.floor(opponentStrength * 100 / totalOpponentStrength);
     opponentBar.querySelector('.item_value').innerText = `${opponentStrength} units`;
     opponentBar.querySelector('.progress').style.width = `${opponentPercentage}%`;
@@ -345,7 +362,8 @@ function updateCompletion() {
         sendUpdate('score-update', {
             data: {
                 name: playerName,
-                percentage: val
+                percentage: val,
+                status: isAlive
             }
         })
     }
@@ -367,14 +385,7 @@ function revealCell(cell) {
     const value = board[cell.dataset.id];
     switch (value) {
 
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
+        case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
             cell.innerHTML = '';
             cell.innerText = value;
             cell.dataset.mineNb = `${value}`;
@@ -386,8 +397,21 @@ function revealCell(cell) {
             cell.innerHTML = '<img class="cell-image" src="/static/minesweeper/mine.svg" alt="mine image">';
             cell.classList.add('mine');
             revealAll();
-            isFinished = true;
-            endGame();
+            isAlive = false;
+            updateCompletion();
+
+            if (!isMultiplayer || opponentStrength > playerStrength || !isPlayer2Alive) {
+                isFinished = true;
+                endGame();
+            } else {
+
+                // disable clicks and further moves till the endgame
+                for (let i = 0; i < board.length; i++) {
+                    let cell = document.querySelector(`.cell[data-id='${i}']`);
+                    cell = clearEventListeners(cell);
+                    cell.addEventListener('contextmenu', (e) => e.preventDefault());
+                }
+            }
             return;
 
         default:
@@ -425,7 +449,7 @@ function revealAll() {
 
 function play() {
     if (isMultiplayer) {
-        totalOpponentStrength = 1_000;
+        totalOpponentStrength = totalPlayerStrength;
         opponentStrength = 0;
     }
     ++roundNb;

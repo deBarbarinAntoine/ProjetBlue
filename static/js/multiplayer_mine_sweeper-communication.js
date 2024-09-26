@@ -34,6 +34,7 @@ function startMatchingMultiplayer(playerName) {
                                             <li class="button-30" id="back_to_start-button">Back to Menu</li> 
                                         </ul>
                                 </div>`;
+        document.getElementById('game-board').innerHTML = '';
         document.getElementById('game-board').appendChild(LoadingImage); // Append overlay to game-area
         LoadingImage.style.display = 'flex'; // Show the overlay
     };
@@ -51,10 +52,16 @@ function startMatchingMultiplayer(playerName) {
 
         // Handle updates from opponent's score or progress
         if (data.type === 'score-update') {
-            const { name, percentage } = data.data;
+            const { name, percentage, status } = data.data;
             // Update the UI to show the opponent's score
             if (name !== playerName) {// Assuming playerName is the current player's name
+                isPlayer2Alive = status;
                 multiplayerUpdateCompletion(percentage);
+
+                if (!isAlive && (opponentStrength > playerStrength || !isPlayer2Alive )) {
+                    isFinished = true;
+                    endGame();
+                }
             }
         }
 

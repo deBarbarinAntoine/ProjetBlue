@@ -224,6 +224,7 @@ func monitorPlayerConnection(player *Player, room *Room) {
 			Data struct {
 				Name       string `json:"name"`
 				Percentage int    `json:"percentage"`
+				Status     bool   `json:"status"`
 			} `json:"data"`
 			// Add other fields that you expect in the payload
 		}
@@ -233,6 +234,7 @@ func monitorPlayerConnection(player *Player, room *Room) {
 			fmt.Println("Error parsing message:", err)
 			continue
 		}
+
 		// Now you can handle different types of messages based on messageData.Type
 		if messageData.Type == "score-update" {
 			if messageData.Data.Name == room.Player1.Name {
