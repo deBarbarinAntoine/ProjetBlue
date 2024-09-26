@@ -1,12 +1,14 @@
 const nameInput = document.getElementById('name-input');
 const joinMultiplayer = document.getElementById('multiplayer-btn');
 // Establishing WebSocket connection
-const socket = new WebSocket(`ws://localhost:8080/waitingRoom?name=${playerName}`);
+let socket;
+let playerName;
 
 
 if(!!joinMultiplayer && !!nameInput) {
     joinMultiplayer.addEventListener("click", function() {
         if (nameInput.value !== "") {
+            playerName = nameInput.value
             startMatchingMultiplayer(nameInput.value);
 
         } else {
@@ -16,7 +18,7 @@ if(!!joinMultiplayer && !!nameInput) {
 }
 
 function startMatchingMultiplayer(playerName) {
-
+    socket = new WebSocket(`ws://localhost:8080/waitingRoom?name=${playerName}`);
 // On connection open
     socket.onopen = function () {
         console.log('Connected to WebSocket server.');
@@ -47,9 +49,13 @@ function startMatchingMultiplayer(playerName) {
             // Update the UI to show the opponent's score
             if (player !== playerName) { // Assuming playerName is the current player's name
                 opponentStrength = score;
-                opponentBar.querySelector('.item_value').innerText = `${opponentStrength} units`;
                 updateProgressBar({ percentage: (opponentStrength / totalPlayerStrength) * 100, units: opponentStrength }, opponentBar);
             }
+        }
+
+        if (data.type === 'start-game'){
+            isMultiplayer = true
+            play()
         }
     };
 

@@ -21,6 +21,7 @@ const timer = document.querySelector('#timer');
 let isPaused = true;
 let isFinished = false;
 let roundNb = 0;
+let isMultiplayer= false
 
 function nextLevel() {
     width += 2;
@@ -131,7 +132,7 @@ function endGame() {
     let message = '';
     let hasNext = false;
     if (playerStrength >= opponentStrength) {
-        if (roundNb < 5) hasNext = true;
+        if (roundNb < 5 && !isMultiplayer) hasNext = true;
         message = hasNext ? `you won!` : `you won with ${totalPlayerStrength} units max!`;
         const percentageLoss = 100 - Math.floor(opponentStrength * 100 / totalPlayerStrength);
         updateProgressBar({percentage: 0, units: 0}, opponentBar);
@@ -145,6 +146,7 @@ function endGame() {
     overlay.innerHTML = `<p>Game Over!</p><p>${message}</p>`;
     boardElem.appendChild(overlay);
     if (hasNext) setTimeout(() => nextLevel(), 4000);
+    isMultiplayer=false
 }
 
 function displayTimer() {
@@ -337,9 +339,14 @@ function setBars() {
 function updateCompletion(){
     let val = Math.floor(100 * revealedCount / ((width * height) - mineNb));
     playerStrength = Math.floor(totalPlayerStrength * (val / 100));
+    if (isMultiplayer) {
+        // Function to send WebSocket updates
+        sendUpdate('score-update', {playerName, playerStrength})
+    }
 
     updateProgressBar({percentage: val, units: playerStrength})
 }
+
 
 function revealCell(cell) {
     cell = clearEventListeners(cell);

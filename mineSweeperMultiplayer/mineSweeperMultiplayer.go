@@ -168,6 +168,23 @@ func startGame(room *Room) {
 
 	// Now manage the game state, turns, etc.
 	room.IsActive = true
+
+	// Notify players that the game is starting
+	startGameMessage := map[string]interface{}{
+		"type": "start-game",
+	}
+
+	// Send the message to Player 1
+	err := room.Player1.Conn.WriteJSON(startGameMessage)
+	if err != nil {
+		fmt.Println("Error notifying player 1 about the start of the game:", err)
+	}
+
+	// Send the message to Player 2
+	err = room.Player2.Conn.WriteJSON(startGameMessage)
+	if err != nil {
+		fmt.Println("Error notifying player 2 about the start of the game:", err)
+	}
 }
 
 func monitorPlayerConnection(player *Player, room *Room) {
