@@ -40,7 +40,7 @@ type Player struct {
 	Active bool
 }
 
-var waitingRoom = make(chan *Player, 2)  // Queue of players waiting for a match
+var waitingRoom = make(chan *Player, 10) // Queue of players waiting for a match
 var activeRooms = make(map[string]*Room) // Active rooms
 
 var fileLock sync.Mutex // Protects file access to avoid race conditions
@@ -185,19 +185,33 @@ func mineSweeper(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./html-page/mine-sweeper.html")
 }
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		// Allow all origins (you can restrict this in production)
+		return true
+	},
+}
 
 // WebSocket handler for joining the waiting room
 func joinWaitingRoom(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
+		http.Error(w, "Could not open websocket connection"+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Player details (you can add more validation if necessary)
+	playerName := r.URL.Query().Get("name")
+	if playerName == "" {
+		http.Error(w, "Player name is required", http.StatusBadRequest)
 		return
 	}
 
 	// Player details
 	player := &Player{
-		Name:   r.URL.Query().Get("name"),
+		Name:   playerName,
 		Conn:   conn,
 		Active: true,
 	}
