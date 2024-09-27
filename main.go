@@ -105,7 +105,7 @@ func retrieveScoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// File path for storing the scores
-	filePath := "./static/shooting-scores.json"
+	filePath := filepath.Join("static", "shooting-scores.json")
 
 	// Lock to prevent concurrent access to the file
 	fileLock.Lock()
