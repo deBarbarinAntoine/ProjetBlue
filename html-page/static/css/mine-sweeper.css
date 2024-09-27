@@ -1,0 +1,307 @@
+@font-face {
+    src: url('/html-page/staticage/static/minesweeper/WARGAMES.ttf') format('truetype');
+    font-family: Wargames;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Fira Code", sans-serif;
+    text-align: center;
+    min-height: 100dvh;
+    background-image: url("/html-page/staticage/static/minesweeper/camo.jpg");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    backdrop-filter: brightness(0.5);
+}
+h1 {
+    font-size: 2.5em;
+    margin-top: 20px;
+    color: #D6D6E7;
+}
+p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #D6D6E7;
+}
+#info {
+    display: flex;
+    justify-content: center;
+}
+#info #timer{
+    display: none;
+    justify-content: center;
+    gap: 2ch;
+    padding: 1rem 2rem;
+    border-radius: .3rem;
+    background-color: darkcyan;
+    user-select: none;
+    width: fit-content;
+}
+#info #timer .hour,
+#info #timer .minute,
+#info #timer .second{
+    padding: .7rem;
+    border-radius: .3rem;
+    background-color: #fee6e3;
+    font-size: 4rem;
+    color: dodgerblue;
+}
+.game-ctn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 7rem;
+}
+.game-ctn .army-img {
+    flex: 1;
+}
+.game-ctn .army-img img {
+    width: 70%;
+}
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #777777AA;
+    backdrop-filter: blur(8px);
+    z-index: 5;
+}
+.overlay .outcome-ctn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    width: fit-content;
+    height: fit-content;
+    padding: 1rem 2rem;
+    border-radius: .7rem;
+    background-color: #101028;
+}
+.overlay .outcome-ctn .message {
+    font-size: 1.5rem;
+}
+.overlay .outcome-ctn .title {
+    font-size: 2.2rem;
+}
+.overlay .outcome-ctn .won {
+    color: #75BAFF;
+}
+.overlay .outcome-ctn .tied {
+    color: #E3F988;
+}
+.overlay .outcome-ctn .lost {
+    color: #FFAB85;
+}
+#game-board {
+    position: relative;
+    display: grid;
+    margin: 0 auto;
+    user-select: none;
+}
+.menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4rem;
+    width: 50vw;
+    height: 70dvh;
+}
+.input {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+}
+.input .name-input {
+    width: 100%;
+    height: 4.5rem;
+    font-size: 1.5rem;
+    text-align: center;
+    border: none;
+    outline: none;
+    border-radius: .4rem;
+    background-color: #fee6e3;
+}
+.menu-btn {
+    align-items: center;
+    background-color: #fee6e3;
+    border: 2px solid #111;
+    border-radius: .4rem;
+    box-sizing: border-box;
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-family: Inter,sans-serif;
+    font-size: 1.5rem;
+    height: 4.5rem;
+    justify-content: center;
+    line-height: 24px;
+    width: 100%;
+    padding: 0 25px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+#start-btn:after {
+    background-color: #111;
+    border-radius: 8px;
+    content: "";
+    display: block;
+    height: 48px;
+    left: 0;
+    width: 100%;
+    position: absolute;
+    top: -2px;
+    transform: translate(8px, 8px);
+    transition: transform .2s ease-out;
+    z-index: -1;
+}
+#start-btn:hover:after {
+    transform: translate(0, 0);
+}
+#start-btn:active {
+    background-color: #ffdeda;
+    outline: 0;
+}
+#start-btn:hover {
+    outline: 0;
+}
+@media (min-width: 768px) {
+    #start-btn {
+        padding: 0 40px;
+    }
+}
+.cell {
+    width: 48px;
+    height: 48px;
+    border: 1px solid black;
+    background-color: #EAAF7B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: url("/html-page/staticage/static/minesweeper/pickaxe.png") 4 8, auto;
+    user-select: none;
+}
+.cell.revealed {
+    background-color: lightsteelblue;
+    cursor: url("/html-page/staticage/static/minesweeper/pickaxe.png") 4 8, auto;
+}
+.cell.revealed[data-mine-nb="0"] {
+    background-color: lightskyblue;
+}
+.cell.revealed[data-mine-nb="1"] {
+    color: dodgerblue;
+}
+.cell.revealed[data-mine-nb="2"] {
+    color: darkcyan;
+}
+.cell.revealed[data-mine-nb="3"] {
+    color: orange;
+}
+.cell.revealed[data-mine-nb="4"] {
+    color: lightcoral;
+}
+.cell.revealed[data-mine-nb="5"] {
+    color: orangered;
+}
+.cell.revealed[data-mine-nb="6"] {
+    color: red;
+}
+.cell.revealed[data-mine-nb="7"] {
+    color: maroon;
+}
+.cell.revealed[data-mine-nb="8"] {
+    color: darkmagenta;
+}
+.cell.flagged {
+    background-color: teal;
+}
+.cell.mine {
+    background-color: red;
+}
+.cell-image {
+    object-fit: contain;
+    object-position: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* recap info */
+.recap-info {
+    display: none;
+    gap: 2rem;
+    padding: 2rem 0;
+}
+.player, .opponent {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.opponent .strength {
+    color: midnightblue;
+    font-size: 32px;
+}
+
+/* progress bar */
+.progress_bar_item {
+    width: 65%;
+    height: 4rem;
+    margin-bottom: 2rem;
+}
+.labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+}
+.item_label,
+.item_value {
+    font-family: Wargames, sans-serif;
+    font-size: 2.5rem;
+    height: 2.5rem;
+    font-weight: 800;
+    color: #D3D5D7;
+}
+.item_bar {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    border-radius: 7px;
+}
+.item_bar .progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    margin: 0;
+    background-color: #f50045;
+    border-radius: 7px;
+    transition: width 100ms ease;
+}

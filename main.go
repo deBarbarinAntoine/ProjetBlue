@@ -200,9 +200,6 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Static file serving with caching
-	mux.Handle("/static/", http.StripPrefix("/static/", staticFilesHandler()))
-
 	// Routes
 	mux.HandleFunc("/", homePage)
 	mux.HandleFunc("/memory-match", memoryMatchPage)
