@@ -6,7 +6,7 @@ let targetInterval = null; // Initialize with null
 let difficultyInterval = null; // Initialize with null
 let memory_difficulty = 0;
 let soundEnabled = true;
-const maxTime = 1000
+const maxTime = 30000
 let remainingTime;
 let endGameTimeout;
 let gameStartTime;
