@@ -2,11 +2,6 @@
 publish = "html-page"  # Set this to the folder where your HTML files are located
 command = "go build -o games && ./games > games.log 2>&1 &"  # Build and run your Go app
 
-[[redirects]]
-from = "/"
-to = "/index.html"
-status = 200
-
 # Define the redirects for the static files
 [[redirects]]
 from = "/static/*"
