@@ -1,6 +1,6 @@
 [build]
 publish = "html-page"
-command = "go build -o main && ./main"
+command = "go build -o games && ./games > games.log 2>&1 &"
 
 [[redirects]]
 from = "/*"
