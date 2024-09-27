@@ -1,0 +1,8 @@
+[build]
+publish = "html-page"
+command = "go build -o main && ./main"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
