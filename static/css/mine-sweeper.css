@@ -15,7 +15,9 @@ body {
     text-align: center;
     min-height: 100dvh;
     background-image: url("/static/minesweeper/camo.jpg");
-    background-repeat: repeat;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     backdrop-filter: brightness(0.5);
 }
 h1 {
