@@ -156,7 +156,7 @@ func puzzleGamePage(w http.ResponseWriter, r *http.Request) {
 
 // Serve the shooting target page
 func shootingGame(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./html-page/shoot-the-target.html")
+	http.ServeFile(w, r, "./html-page/shooting-game.html")
 }
 
 // Serve the mine sweeper page
