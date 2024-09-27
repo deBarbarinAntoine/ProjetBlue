@@ -1,27 +1,19 @@
 [
   {
-    "name": "Nicolas",
-    "score": 99999
-  },
-  {
-    "name": "Thorg the boss",
-    "score": 77777
-  },
-  {
-    "name": "Nicolas",
-    "score": 8247
-  },
-  {
-    "name": "testest",
-    "score": 1487
-  },
-  {
     "name": "Erwann",
     "score": 1109
   },
   {
     "name": "Nicolas",
     "score": 666
+  },
+  {
+    "name": "Nicolas",
+    "score": 636
+  },
+  {
+    "name": "nicolas",
+    "score": 459
   },
   {
     "name": "Nicolas",
@@ -42,33 +34,5 @@
   {
     "name": "Thorg",
     "score": 112
-  },
-  {
-    "name": "trop fort",
-    "score": 50
-  },
-  {
-    "name": "Nini",
-    "score": 50
-  },
-  {
-    "name": "Nicolas",
-    "score": 50
-  },
-  {
-    "name": "Nicolas",
-    "score": 20
-  },
-  {
-    "name": "Nicolas",
-    "score": 10
-  },
-  {
-    "name": "Nicolas",
-    "score": 0
-  },
-  {
-    "name": "Nicolas",
-    "score": -200
   }
 ]

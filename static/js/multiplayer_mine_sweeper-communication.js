@@ -18,7 +18,7 @@ if(!!joinMultiplayer && !!nameInput) {
 }
 
 function startMatchingMultiplayer(playerName) {
-    socket = new WebSocket(`ws://192.168.182.147:8080/waitingRoom?name=${playerName}`);
+    socket = new WebSocket(`ws://localhost:8080/waitingRoom?name=${playerName}`);
 // On connection open
     socket.onopen = function () {
         console.log('Connected to WebSocket server.');
@@ -53,12 +53,13 @@ function startMatchingMultiplayer(playerName) {
         // Handle updates from opponent's score or progress
         if (data.type === 'score-update') {
             const { name, percentage, status } = data.data;
+            console.log(status)
             // Update the UI to show the opponent's score
             if (name !== playerName) {// Assuming playerName is the current player's name
                 multiplayerUpdateCompletion(percentage);
 
                 isPlayer2Alive = status;
-                if (!isAlive && (opponentStrength > playerStrength || !isPlayer2Alive )) {
+                if ( (!isAlive && (opponentStrength > playerStrength || !isPlayer2Alive )) || (isAlive && (!isPlayer2Alive && playerStrength > opponentStrength)) ) {
                     isFinished = true;
                     endGame();
                 }
