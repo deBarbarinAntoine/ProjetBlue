@@ -436,14 +436,14 @@ function showPausedOverlay() {
         });
     }
 
-    const show_best_players = document.getElementById('best-scores-button');
-    if (show_best_players) {
-        show_best_players.addEventListener('click', () => {
-            playSound(startClickSound)
-            hidePausedOverlay()
-            showScore()
-        });
-    }
+    // const show_best_players = document.getElementById('best-scores-button');
+    // if (show_best_players) {
+    //     show_best_players.addEventListener('click', () => {
+    //         playSound(startClickSound)
+    //         hidePausedOverlay()
+    //         showScore()
+    //     });
+    // }
 
 
     const fullscreen = document.getElementById('fullscreen-button');
