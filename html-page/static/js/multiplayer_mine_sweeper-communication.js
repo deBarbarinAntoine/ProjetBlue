@@ -28,7 +28,7 @@ function startMatchingMultiplayer(playerName) {
         LoadingImage.id = 'LoadingImage-overlay';
         LoadingImage.innerHTML = `<div id="LoadingImage-menu" class="menu">
                                         <div class="LoadingImage-display">
-                                        <img src="/static/minesweeper/loadingImg.gif" alt="waiting to find another player">
+                                        <img src="../../static/minesweeper/loadingImg.gif" alt="waiting to find another player">
                                         </div> 
                                         <ul class="menu-options">
                                             <li class="button-30" id="back_to_start-button">Back to Menu</li> 
