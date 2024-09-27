@@ -1,5 +1,5 @@
 @font-face {
-    src: url('/html-page/staticage/static/minesweeper/WARGAMES.ttf') format('truetype');
+    src: url('/html-page/static/minesweeper/WARGAMES.ttf') format('truetype');
     font-family: Wargames;
     font-style: normal;
 }
@@ -14,7 +14,7 @@ body {
     font-family: "Fira Code", sans-serif;
     text-align: center;
     min-height: 100dvh;
-    background-image: url("/html-page/staticage/static/minesweeper/camo.jpg");
+    background-image: url("/html-page/static/minesweeper/camo.jpg");
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -197,12 +197,12 @@ p {
     align-items: center;
     justify-content: center;
     font-size: 32px;
-    cursor: url("/html-page/staticage/static/minesweeper/pickaxe.png") 4 8, auto;
+    cursor: url("/html-page/static/minesweeper/pickaxe.png") 4 8, auto;
     user-select: none;
 }
 .cell.revealed {
     background-color: lightsteelblue;
-    cursor: url("/html-page/staticage/static/minesweeper/pickaxe.png") 4 8, auto;
+    cursor: url("/html-page/static/minesweeper/pickaxe.png") 4 8, auto;
 }
 .cell.revealed[data-mine-nb="0"] {
     background-color: lightskyblue;
