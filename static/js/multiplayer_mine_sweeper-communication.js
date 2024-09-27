@@ -55,9 +55,9 @@ function startMatchingMultiplayer(playerName) {
             const { name, percentage, status } = data.data;
             // Update the UI to show the opponent's score
             if (name !== playerName) {// Assuming playerName is the current player's name
-                isPlayer2Alive = status;
                 multiplayerUpdateCompletion(percentage);
 
+                isPlayer2Alive = status;
                 if (!isAlive && (opponentStrength > playerStrength || !isPlayer2Alive )) {
                     isFinished = true;
                     endGame();
