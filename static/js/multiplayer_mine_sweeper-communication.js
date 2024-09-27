@@ -18,7 +18,7 @@ if(!!joinMultiplayer && !!nameInput) {
 }
 
 function startMatchingMultiplayer(playerName) {
-    socket = new WebSocket(`ws://localhost:8080/waitingRoom?name=${playerName}`);
+    socket = new WebSocket(`ws://192.168.182.147:8080/waitingRoom?name=${playerName}`);
 // On connection open
     socket.onopen = function () {
         console.log('Connected to WebSocket server.');
